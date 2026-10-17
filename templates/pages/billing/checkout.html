@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Checkout — {{ plan.name }} | THE BASICS{% endblock %}
+{% block content %}
+<div style="padding: 120px 20px 60px; max-width: 480px; margin: 0 auto; text-align: center;">
+    <h1 style="color: var(--primary); font-size: 1.6rem; margin-bottom: 8px;">{{ plan.name }} Plan</h1>
+    <p style="color: var(--text-muted); margin-bottom: 24px;">₹{{ '{:,}'.format(plan.price_inr) }} · {{ plan.duration_days // 30 }} Months Access</p>
+
+    <button id="rzp-pay-btn" style="width: 100%; padding: 14px; border: none; border-radius: 8px; background: var(--accent-gradient); color: var(--primary); font-weight: 700; font-size: 1rem; cursor: pointer;">
+        Pay ₹{{ '{:,}'.format(plan.price_inr) }}
+    </button>
+    <p id="rzp-error" style="color: #ef4444; margin-top: 12px; display: none;"></p>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    document.getElementById('rzp-pay-btn').addEventListener('click', function () {
+        const options = {
+            key: {{ key_id_json|safe }},
+            amount: '{{ amount_paise }}',
+            currency: 'INR',
+            name: 'THE BASICS',
+            description: {{ description_json|safe }},
+            order_id: {{ order_id_json|safe }},
+            prefill: {
+                name: {{ user_name_json|safe }},
+                email: {{ user_email_json|safe }}
+            },
+            theme: { color: '#000F36' },
+            handler: function (response) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = {{ verify_url_json|safe }};
+
+                const fields = {
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                    csrfmiddlewaretoken: (document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/) || [])[1] || ''
+                };
+                for (const name in fields) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name;
+                    input.value = fields[name];
+                    form.appendChild(input);
+                }
+                document.body.appendChild(form);
+                form.submit();
+            },
+            modal: {
+                ondismiss: function () {
+                    document.getElementById('rzp-error').textContent = 'Payment cancelled. You can try again anytime.';
+                    document.getElementById('rzp-error').style.display = 'block';
+                }
+            }
+        };
+        const rzp = new Razorpay(options);
+        rzp.on('payment.failed', function (response) {
+            document.getElementById('rzp-error').textContent = 'Payment failed: ' + response.error.description;
+            document.getElementById('rzp-error').style.display = 'block';
+        });
+        rzp.open();
+    });
+</script>
+{% endblock %}

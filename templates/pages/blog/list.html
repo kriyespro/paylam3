@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Our Blogs | THE BASICS{% endblock %}
+{% block content %}
+<section class="subject-header" style="padding: 120px 20px 60px; text-align: center; background: #0A192F;">
+    <div class="container">
+        <h1 style="font-size: 3.5rem; font-weight: 800; color: white; text-transform: uppercase;"><i class="fas fa-blog"></i> Our Blogs</h1>
+        <p style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.85); margin-top: 15px; font-weight: 500;">Read detailed articles and strategies from toppers and expert faculty.</p>
+    </div>
+</section>
+
+<section style="padding: 40px 20px 80px; background: var(--bg-main); min-height: 40vh;">
+    <div class="container" style="max-width: 800px; margin: 0 auto;">
+        {% if posts %}
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            {% for post in posts %}
+            <a href="{{ url('blog:detail', kwargs={'slug': post.slug}) }}" class="news-card" style="padding: 20px; display: block; text-decoration: none;">
+                <h3 style="font-size: 1.15rem; margin-bottom: 6px; color: var(--text-main);">{{ post.title }}</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">{{ post.published_date }}</p>
+            </a>
+            {% endfor %}
+        </div>
+        {% if page_obj.has_other_pages() %}
+        <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
+            {% if page_obj.has_previous() %}<a href="?page={{ page_obj.previous_page_number() }}" class="btn btn-outline-dark">&larr; Prev</a>{% endif %}
+            <span style="padding:10px 6px; font-size:0.85rem; color:var(--text-muted);">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next() %}<a href="?page={{ page_obj.next_page_number() }}" class="btn btn-outline-dark">Next &rarr;</a>{% endif %}
+        </div>
+        {% endif %}
+        {% else %}
+        <p style="text-align: center; color: var(--text-muted); padding: 40px 0;">Coming Soon! Check back soon for expert strategies and topper interviews.</p>
+        {% endif %}
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{{ url('core:home') }}" class="btn btn-primary">Return Home</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

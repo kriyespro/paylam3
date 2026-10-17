@@ -1,0 +1,68 @@
+{% extends "pages/platform_admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+<div class="pa-stats-grid">
+    <div class="pa-stat-card"><a href="{{ url('platform_admin:subject_list') }}"><i class="fas fa-book-open"></i><div class="pa-stat-value">{{ counts.subjects }}</div><div class="pa-stat-label">Subjects</div></a></div>
+    <div class="pa-stat-card"><a href="{{ url('platform_admin:question_list') }}"><i class="fas fa-check-square"></i><div class="pa-stat-value">{{ counts.prelims_questions }}</div><div class="pa-stat-label">Prelims Q</div></a></div>
+    <div class="pa-stat-card"><a href="{{ url('platform_admin:mains_question_list') }}"><i class="fas fa-pen-nib"></i><div class="pa-stat-value">{{ counts.mains_questions }}</div><div class="pa-stat-label">Mains Q</div></a></div>
+    <div class="pa-stat-card"><a href="{{ url('platform_admin:article_list') }}"><i class="far fa-newspaper"></i><div class="pa-stat-value">{{ counts.articles }}</div><div class="pa-stat-label">Articles</div></a></div>
+    <div class="pa-stat-card"><a href="{{ url('platform_admin:post_list') }}"><i class="fas fa-blog"></i><div class="pa-stat-value">{{ counts.posts }}</div><div class="pa-stat-label">Blog Posts</div></a></div>
+    <div class="pa-stat-card"><a href="{{ url('platform_admin:user_list') }}"><i class="fas fa-users"></i><div class="pa-stat-value">{{ counts.users }}</div><div class="pa-stat-label">Users</div></a></div>
+    <div class="pa-stat-card"><i class="fas fa-file-lines"></i><div class="pa-stat-value">{{ counts.submissions }}</div><div class="pa-stat-label">Submissions</div></div>
+    <div class="pa-stat-card"><i class="fas fa-star"></i><div class="pa-stat-value">{{ counts.evaluations }}</div><div class="pa-stat-label">Evaluations</div></div>
+</div>
+
+<div class="pa-panel">
+    <h2>Platform Status</h2>
+    {% for bar in platform_status %}
+    <div class="pa-chart-row">
+        <div class="pa-chart-label"><i class="{{ bar.icon }}" style="color: var(--secondary);"></i> {{ bar.label }}</div>
+        <div class="pa-chart-track"><div class="pa-chart-fill" style="width: {{ bar.pct }}%"></div></div>
+        <div class="pa-chart-value">{{ bar.value }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="pa-panel">
+    <h2>Quick Actions</h2>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <a href="{{ url('platform_admin:article_create') }}" class="pa-btn pa-btn-primary"><i class="fas fa-plus"></i> New Article</a>
+        <a href="{{ url('platform_admin:post_create') }}" class="pa-btn pa-btn-primary"><i class="fas fa-plus"></i> New Blog Post</a>
+        <a href="{{ url('platform_admin:question_create') }}" class="pa-btn pa-btn-primary"><i class="fas fa-plus"></i> New Prelims Question</a>
+        <a href="{{ url('platform_admin:mains_question_create') }}" class="pa-btn pa-btn-primary"><i class="fas fa-plus"></i> New Mains Question</a>
+        <a href="{{ url('platform_admin:backup_download') }}" class="pa-btn pa-btn-secondary"><i class="fas fa-download"></i> Backup</a>
+        {% if request.user.is_superuser %}
+        <a href="{{ url('platform_admin:restore_upload') }}" class="pa-btn pa-btn-danger"><i class="fas fa-upload"></i> Restore</a>
+        {% endif %}
+    </div>
+    <p class="pa-note">{{ attempts_today }} question attempt{{ 's' if attempts_today != 1 else '' }} logged today across all users.</p>
+</div>
+
+<div class="pa-two-col">
+    <div class="pa-panel">
+        <h2>Recent Users</h2>
+        {% for u in recent_users %}
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border-color);font-size:0.88rem;">
+            <span>{{ u.profile.display_name or u.email }}</span>
+            <span style="color:var(--text-muted);">{{ u.date_joined.date() }}</span>
+        </div>
+        {% else %}
+        <p style="color:var(--text-muted);font-size:0.88rem;">No users yet.</p>
+        {% endfor %}
+        <a href="{{ url('platform_admin:user_list') }}" style="display:inline-block;margin-top:14px;font-size:0.82rem;font-weight:700;color:var(--secondary);text-decoration:none;">View all users &rarr;</a>
+    </div>
+
+    <div class="pa-panel">
+        <h2>Recent Mains Submissions</h2>
+        {% for s in recent_submissions %}
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border-color);font-size:0.88rem;">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%;">{{ s.user.profile.display_name or s.user.email }} &bull; {{ s.question.paper }}</span>
+            <span style="color:var(--text-muted);">{{ s.created_at.date() }}</span>
+        </div>
+        {% else %}
+        <p style="color:var(--text-muted);font-size:0.88rem;">No submissions yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

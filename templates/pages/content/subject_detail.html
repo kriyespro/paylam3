@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}{{ subject.name }} | THE BASICS{% endblock %}
+
+{% block extra_head %}
+{% if subject.theme == 'navy' %}
+{% set c_primary, c_accent, c_gradient_end = '#0A2A66', '#D4AF37', '#1a3c7c' %}
+{% elif subject.theme == 'orange' %}
+{% set c_primary, c_accent, c_gradient_end = '#EA580C', '#C2410C', '#9a3412' %}
+{% else %}
+{% set c_primary, c_accent, c_gradient_end = '#16A34A', '#059669', '#064e3b' %}
+{% endif %}
+<style>
+    :root {
+        --premium-bg: #E2E8F0;
+        --premium-card: #FFFFFF;
+        --premium-primary: {{ c_primary }};
+        --premium-accent: {{ c_accent }};
+        --premium-success: {{ c_primary }};
+        --premium-text-heading: #0F172A;
+        --premium-text-secondary: #64748B;
+        --premium-border: #E5E7EB;
+        --premium-shadow: 0 12px 30px rgba(15,23,42,.08);
+        --premium-radius: 22px;
+    }
+    body { background-color: var(--premium-bg); color: var(--premium-text-secondary); }
+
+    .premium-header {
+        padding: 120px 20px 60px; text-align: center;
+        background: linear-gradient(135deg, {{ c_primary }} 0%, {{ c_gradient_end }} 100%);
+        color: white; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px;
+        margin-bottom: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .premium-header h1 { font-size: 3.5rem; font-weight: 800; color: white; letter-spacing: 1px; margin-bottom: 10px; }
+    .premium-header p { font-size: 1.2rem; color: #E2E8F0; max-width: 600px; margin: 0 auto; }
+
+    .premium-container { max-width: 900px; margin: 0 auto; padding: 0 20px 80px; }
+
+    .premium-subject-card {
+        background: var(--premium-card); border: 1px solid var(--premium-border);
+        border-radius: var(--premium-radius); box-shadow: var(--premium-shadow);
+        margin-bottom: 30px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .premium-subject-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(15,23,42,.12); }
+
+    .card-header { padding: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; border-bottom: 1px solid var(--premium-border); }
+    .card-title-wrap { display: flex; align-items: center; gap: 20px; }
+    .subject-icon { width: 60px; height: 60px; background: color-mix(in srgb, {{ c_primary }} 10%, transparent); color: var(--premium-primary); border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 28px; }
+    .subject-info h2 { color: var(--premium-text-heading); font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
+    .subject-info p { font-size: 0.95rem; font-weight: 500; }
+
+    .card-actions { padding: 20px 30px; background: #FAFAF9; }
+    .btn-continue {
+        width: 100%; padding: 15px; background: var(--premium-accent); color: #fff; border: none;
+        border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer;
+        display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;
+    }
+    .btn-continue i { transition: transform 0.3s; }
+
+    .units-container { padding: 30px; background: var(--premium-card); }
+
+    .timeline { position: relative; padding-left: 30px; }
+    .timeline::before { content: ''; position: absolute; left: 14px; top: 0; bottom: 0; width: 2px; background: var(--premium-border); }
+    .timeline-item { position: relative; margin-bottom: 30px; }
+    .timeline-item:last-child { margin-bottom: 0; }
+    .timeline-marker {
+        position: absolute; left: -30px; top: 0; width: 30px; height: 30px; background: white;
+        border: 2px solid var(--premium-border); border-radius: 50%;
+        display: flex; justify-content: center; align-items: center; transform: translateX(-50%); z-index: 2;
+    }
+    .timeline-marker .unit-number { font-size: 0.8rem; font-weight: 700; color: var(--premium-text-secondary); }
+    .timeline-content { background: #F8FAFC; border: 1px solid var(--premium-border); border-radius: 16px; overflow: hidden; }
+
+    .unit-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: white; transition: background 0.2s; }
+    .unit-header:hover { background: #F1F5F9; }
+    .unit-header h3 { color: var(--premium-text-heading); font-size: 1.1rem; margin-bottom: 5px; }
+    .unit-header p { font-size: 0.85rem; margin: 0; }
+
+    .lessons-container { border-top: 1px solid var(--premium-border); padding: 10px 20px; }
+    .lesson-list { list-style: none; padding: 0; margin: 0; }
+    .lesson-item { padding: 12px 0; border-bottom: 1px solid var(--premium-border); display: flex; flex-direction: column; gap: 5px; font-size: 0.95rem; color: var(--premium-text-heading); }
+    .lesson-item:last-child { border-bottom: none; }
+    .lesson-header-row { display: flex; align-items: center; gap: 15px; width: 100%; }
+    .lesson-description { font-size: 0.85rem; color: var(--premium-text-secondary); padding-left: 31px; line-height: 1.4; }
+    .lesson-type-icon { color: var(--premium-primary); opacity: 0.7; }
+    .lesson-duration { color: var(--premium-text-secondary); font-size: 0.85rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="premium-header">
+    <h1>{{ subject.name.upper() }}</h1>
+    <p>{{ subject.tagline or 'Structured units, practice questions, and revision-ready notes.' }}</p>
+</header>
+
+<div class="premium-container" x-data="{ openModules: {} }">
+    {% for module in subject.modules.all() %}
+    <div class="premium-subject-card">
+        <div class="card-header">
+            <div class="card-title-wrap">
+                <div class="subject-icon"><i class="{{ module.icon or subject.icon or 'fas fa-book' }}"></i></div>
+                <div class="subject-info">
+                    <h2>{{ module.title }}</h2>
+                    <p>{{ module.units.all()|length }} Units</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-actions">
+            <button class="btn-continue" @click="openModules['{{ module.pk }}'] = !openModules['{{ module.pk }}']">
+                <span>Continue Learning</span>
+                <i class="fas fa-chevron-down" :style="openModules['{{ module.pk }}'] ? 'transform: rotate(180deg)' : ''"></i>
+            </button>
+        </div>
+        <div class="units-container" x-show="openModules['{{ module.pk }}']" style="display: none;">
+            <div class="timeline">
+                {% for unit in module.units.all() %}
+                <div class="timeline-item" x-data="{ unitOpen: false }">
+                    <div class="timeline-marker"><span class="unit-number">{{ loop.index }}</span></div>
+                    <div class="timeline-content">
+                        <div class="unit-header" @click="unitOpen = !unitOpen">
+                            <div>
+                                <h3>Unit {{ loop.index }}: {{ unit.title }}</h3>
+                                <p>{{ unit.lessons.all()|length }} Lessons</p>
+                            </div>
+                            <i class="fas fa-chevron-down" :style="unitOpen ? 'transform: rotate(180deg)' : ''"></i>
+                        </div>
+                        <div class="lessons-container" x-show="unitOpen" style="display: none;">
+                            <ul class="lesson-list">
+                                {% for lesson in unit.lessons.all() %}
+                                <li class="lesson-item">
+                                    <div class="lesson-header-row">
+                                        <i class="fas {{ 'fa-play-circle' if lesson.type == 'video' else ('fa-pen-to-square' if lesson.type in ['practice','quiz'] else ('fa-file-alt' if lesson.type == 'text' else 'fa-file-pdf')) }} lesson-type-icon"></i>
+                                        <span class="lesson-title">{{ lesson.title }}</span>
+                                        {% if lesson.duration %}<span class="lesson-duration">({{ lesson.duration }})</span>{% endif %}
+                                    </div>
+                                    {% if lesson.description %}<div class="lesson-description">{{ lesson.description }}</div>{% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Floating Back Button -->
+<a href="javascript:history.back()" class="floating-back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+{% endblock %}

@@ -1,0 +1,8 @@
+<button
+    hx-post="{{ url('engagement:toggle_bookmark', kwargs={'pk': question.pk}) }}"
+    hx-swap="outerHTML"
+    style="background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 4px; color: {{ '#F59E0B' if is_bookmarked else '#CBD5E1' }};"
+    title="{{ 'Remove bookmark' if is_bookmarked else 'Bookmark this question' }}"
+>
+    <i class="{{ 'fas' if is_bookmarked else 'far' }} fa-bookmark"></i>
+</button>

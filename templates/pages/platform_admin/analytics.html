@@ -1,0 +1,54 @@
+{% extends "pages/platform_admin/base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+{% block content %}
+<p class="pa-note" style="margin-bottom: 20px;">Real activity over the last 14 days, from live data — no revenue/billing exists in this app to track.</p>
+
+<div class="pa-panel">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 4px;">
+        <h2 style="margin:0;"><i class="fas fa-user-plus" style="color: var(--secondary);"></i> New Signups</h2>
+        <span class="pa-analytics-total" data-testid="signups-total">{{ signups_total }}</span>
+    </div>
+    <div class="pa-timeseries">
+        {% for day in signups %}
+        <div class="pa-ts-col">
+            <div class="pa-ts-bar-wrap"><div class="pa-ts-bar" style="height: {{ day.pct }}%" title="{{ day.date }}: {{ day.count }}"></div></div>
+            <div class="pa-ts-count">{{ day.count }}</div>
+            <div class="pa-ts-date">{{ day.date.strftime('%b %d') }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="pa-panel">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 4px;">
+        <h2 style="margin:0;"><i class="fas fa-check-square" style="color: var(--secondary);"></i> Prelims Question Attempts</h2>
+        <span class="pa-analytics-total">{{ attempts_total }}</span>
+    </div>
+    <div class="pa-timeseries">
+        {% for day in attempts %}
+        <div class="pa-ts-col">
+            <div class="pa-ts-bar-wrap"><div class="pa-ts-bar" style="height: {{ day.pct }}%" title="{{ day.date }}: {{ day.count }}"></div></div>
+            <div class="pa-ts-count">{{ day.count }}</div>
+            <div class="pa-ts-date">{{ day.date.strftime('%b %d') }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="pa-panel">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 4px;">
+        <h2 style="margin:0;"><i class="fas fa-pen-nib" style="color: var(--secondary);"></i> Mains Submissions</h2>
+        <span class="pa-analytics-total">{{ submissions_total }}</span>
+    </div>
+    <div class="pa-timeseries">
+        {% for day in submissions %}
+        <div class="pa-ts-col">
+            <div class="pa-ts-bar-wrap"><div class="pa-ts-bar" style="height: {{ day.pct }}%" title="{{ day.date }}: {{ day.count }}"></div></div>
+            <div class="pa-ts-count">{{ day.count }}</div>
+            <div class="pa-ts-date">{{ day.date.strftime('%b %d') }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

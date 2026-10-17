@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}My Bookmarks | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/evaluation-theme.css') }}">
+{% endblock %}
+{% block content %}
+<div class="ev-container" style="padding-top: 100px; max-width: 800px;">
+    <div class="ev-header">
+        <div class="ev-title">My <span>Bookmarks</span></div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        {% for bookmark in bookmarks %}
+        <div class="question-box" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 0;">
+            <a href="{{ url('prelims:practice', kwargs={'pk': bookmark.question.pk}) }}" style="flex: 1; text-decoration: none;">
+                <div class="qb-meta"><span class="qmeta-tag qmeta-subject">{{ bookmark.question.subject }}</span></div>
+                <p class="q-text-main" style="font-size: 0.95rem;">{{ bookmark.question.text|striptags }}</p>
+            </a>
+            {% with question=bookmark.question, is_bookmarked=true %}
+            {% include "partials/engagement/bookmark_button.html" %}
+            {% endwith %}
+        </div>
+        {% else %}
+        <p style="color: var(--text-muted);">No bookmarks yet — bookmark a question while practicing to save it here.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

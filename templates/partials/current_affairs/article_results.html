@@ -1,0 +1,39 @@
+<div id="news-stack" style="display: flex; flex-direction: column; gap: 15px;">
+    {% set badge_colors = ['#14378A', '#2E8B57', '#FF8C00', '#FF0050', '#800080'] %}
+    {% for article in articles %}
+    {% set badge = badge_colors[loop.index0 % 5] %}
+    <a href="{{ url('current_affairs:detail', kwargs={'pk': article.pk}) }}" class="news-card"
+       style="padding: 20px; position: relative; display: block; text-decoration: none;">
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <span style="background: {{ badge }}1A; color: {{ badge }}; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">{{ article.category }}</span>
+        </div>
+        {% if article.icon %}
+        <div style="position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.05); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 1.2rem;">
+            <i class="{{ article.icon }}"></i>
+        </div>
+        {% endif %}
+        <h3 style="font-size: 1.15rem; margin-bottom: 10px; color: var(--text-main); line-height: 1.4; padding-right: 50px;">{{ article.title }}</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0; line-height: 1.5;">{{ article.summary }}</p>
+    </a>
+    {% else %}
+    <p style="color: var(--text-muted);">No articles match those filters.</p>
+    {% endfor %}
+
+    {% if page_obj.has_other_pages() %}
+    <div style="display:flex; justify-content:center; gap:10px; margin-top:10px;">
+        {% if page_obj.has_previous() %}
+        <a href="?source={{ selected_source }}&category={{ selected_category }}&page={{ page_obj.previous_page_number() }}"
+           hx-get="{{ url('current_affairs:list') }}?source={{ selected_source }}&category={{ selected_category }}&page={{ page_obj.previous_page_number() }}"
+           hx-target="#news-stack" hx-swap="outerHTML" hx-push-url="true"
+           class="news-filter-btn">&larr; Prev</a>
+        {% endif %}
+        <span style="padding:8px 6px; font-size:0.85rem; color:var(--text-muted);">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next() %}
+        <a href="?source={{ selected_source }}&category={{ selected_category }}&page={{ page_obj.next_page_number() }}"
+           hx-get="{{ url('current_affairs:list') }}?source={{ selected_source }}&category={{ selected_category }}&page={{ page_obj.next_page_number() }}"
+           hx-target="#news-stack" hx-swap="outerHTML" hx-push-url="true"
+           class="news-filter-btn">Next &rarr;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>

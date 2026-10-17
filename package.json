@@ -1,0 +1,11 @@
+{
+  "name": "the-basics-frontend",
+  "private": true,
+  "scripts": {
+    "tailwind:build": "tailwindcss -i ./static/src/css/input.css -o ./static/src/css/output.css",
+    "tailwind:watch": "tailwindcss -i ./static/src/css/input.css -o ./static/src/css/output.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

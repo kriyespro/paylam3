@@ -1,0 +1,29 @@
+{% extends "pages/platform_admin/base.html" %}
+{% block title %}Restore from Backup{% endblock %}
+{% block page_title %}Restore from Backup{% endblock %}
+{% block content %}
+<div class="pa-panel" style="max-width: 600px; border: 2px solid #FECACA;">
+    <h2 style="color: #DC2626;"><i class="fas fa-triangle-exclamation"></i> This overwrites live data</h2>
+    <p style="margin: 12px 0; color: var(--text-main); font-size: 0.9rem; line-height: 1.6;">
+        Restoring loads a backup file and applies it on top of the current database. Any row whose ID already
+        exists in the backup gets <strong>overwritten</strong> with the backup's version. This cannot be undone —
+        if you're not certain, download a fresh backup first.
+    </p>
+
+    <form method="post" enctype="multipart/form-data">
+        {{ csrf_input }}
+        <div class="pa-form-group">
+            <label for="backup_file">Backup file (.json or .json.gz)</label>
+            <input type="file" name="backup_file" id="backup_file" accept=".json,.gz" class="pa-input" required>
+        </div>
+        <div class="pa-form-group">
+            <label for="confirm_phrase">Type <strong>RESTORE</strong> to confirm</label>
+            <input type="text" name="confirm_phrase" id="confirm_phrase" class="pa-input" placeholder="RESTORE" required autocomplete="off">
+        </div>
+        <div class="pa-form-actions">
+            <button type="submit" class="pa-btn pa-btn-danger"><i class="fas fa-database"></i> Restore Now</button>
+            <a href="{{ url('platform_admin:home') }}" class="pa-btn pa-btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

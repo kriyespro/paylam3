@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Something Went Wrong | THE BASICS</title>
+    <!--
+        Django renders 500.html without a request or context processors
+        (deliberately, so an error page can't itself crash) — this template
+        can only use Jinja2's always-on globals (static/url), nothing that
+        depends on request.user, csrf_input, or the site's navbar/footer.
+        Fully self-contained on purpose, not a partial port.
+    -->
+    <style>
+        body { margin: 0; font-family: 'Poppins', 'Inter', sans-serif; background: #E2E8F0; color: #1F2937; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .box { text-align: center; max-width: 480px; }
+        .code { font-size: 5rem; font-weight: 800; color: #000F36; }
+        h1 { font-size: 1.4rem; margin: 10px 0; }
+        p { color: #6B7280; margin-bottom: 24px; }
+        a.btn { display: inline-block; background: #14378A; color: #fff; padding: 12px 28px; border-radius: 30px; font-weight: 700; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="code">500</div>
+        <h1>Something Went Wrong</h1>
+        <p>We hit an unexpected error. It's been logged — try again in a moment.</p>
+        <a href="{{ url('core:home') }}" class="btn">Back to Home</a>
+    </div>
+</body>
+</html>

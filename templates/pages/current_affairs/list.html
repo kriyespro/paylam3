@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}News | THE BASICS{% endblock %}
+{% block meta_description %}Latest UPSC and educational news updates. Stay informed with The Basics.{% endblock %}
+
+{% block content %}
+<!-- News Header -->
+<section class="subject-header" style="padding: 120px 20px 60px; text-align: center; background: #0A192F;">
+    <div class="container">
+        <h1 style="font-size: 3.5rem; font-weight: 800; color: white; text-transform: uppercase;">Latest News</h1>
+        <p style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.85); margin-top: 15px; font-weight: 500;">Stay updated with the latest educational initiatives, UPSC updates, and current affairs.</p>
+    </div>
+</section>
+
+<section style="padding: 20px 20px 80px; background: var(--bg-main); min-height: 50vh;">
+    <div class="container" style="max-width: 800px; margin: 0 auto;">
+
+        <style>
+            .news-filter-btn {
+                white-space: nowrap; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-color);
+                background: transparent; color: var(--text-main); cursor: pointer; font-weight: 500;
+                transition: all 0.2s; text-decoration: none; display: inline-block; font-size: 0.9rem;
+            }
+            .news-filter-btn.active { border-color: var(--primary); background: var(--primary); color: white; }
+            .news-filter-btn:hover:not(.active) { background: var(--bg-hover); }
+        </style>
+        <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px;"
+             hx-get="{{ url('current_affairs:list') }}" hx-target="#news-stack" hx-swap="outerHTML" hx-push-url="true">
+            <a href="?" class="news-filter-btn {{ 'active' if not selected_source }}"
+               hx-get="{{ url('current_affairs:list') }}" hx-target="#news-stack" hx-swap="outerHTML" hx-push-url="true">ALL NEWS</a>
+            {% for value, label in sources %}
+            <a href="?source={{ value }}" class="news-filter-btn {{ 'active' if selected_source == value }}"
+               hx-get="{{ url('current_affairs:list') }}?source={{ value }}" hx-target="#news-stack" hx-swap="outerHTML" hx-push-url="true">{{ label.upper() }}</a>
+            {% endfor %}
+        </div>
+
+        {% include "partials/current_affairs/article_results.html" %}
+    </div>
+</section>
+
+<a href="javascript:history.back()" class="floating-back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+{% endblock %}

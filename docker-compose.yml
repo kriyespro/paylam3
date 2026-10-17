@@ -1,0 +1,85 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-thebasics}
+      POSTGRES_USER: ${POSTGRES_USER:-thebasics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-thebasics}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Real user data lives in Postgres only — Redis here is a pure cache
+  # (see apps.core.context_processors.footer_subjects, the only thing
+  # that goes through it), rebuildable from Postgres at any time, so it
+  # deliberately has no backup of its own; backing up ephemeral derived
+  # data would just be noise.
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    entrypoint: ["/backup.sh"]
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB:-thebasics}
+      POSTGRES_USER: ${POSTGRES_USER:-thebasics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+    volumes:
+      - ./docker/backup.sh:/backup.sh:ro
+      - postgres_backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-thebasics}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-thebasics}
+      REDIS_URL: redis://redis:6379/1
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - static_files:/app/staticfiles
+      - media_files:/app/media
+    expose:
+      - "8000"
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_files:/app/staticfiles:ro
+      - media_files:/app/media:ro
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+  postgres_backups:
+  redis_data:
+  static_files:
+  media_files:

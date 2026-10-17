@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ question.external_id }} | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/mcq-theme.css') }}">
+{% endblock %}
+{% block content %}
+<div class="practice-container" style="padding-top: 100px;" x-data="{ selected: null }">
+    <div class="practice-header">
+        <a href="{{ url('prelims:list') }}" class="close-btn"><i class="fas fa-times"></i></a>
+        <h1 class="practice-title">{{ question.get_type_display() }}</h1>
+        {% if request.user.is_authenticated %}
+        {% include "partials/engagement/bookmark_button.html" %}
+        {% else %}
+        <span style="width: 24px;"></span>
+        {% endif %}
+    </div>
+
+    <p class="question-text">{{ question.text|safe }}</p>
+
+    <form hx-post="{{ url('prelims:submit_answer', kwargs={'pk': question.pk}) }}" hx-target="#answer-result" hx-swap="innerHTML">
+        {{ csrf_input }}
+        <div class="options-list">
+            {% for choice in question.choices.all() %}
+            <label class="option-card" :class="selected === {{ choice.pk }} ? 'selected' : ''" @click="selected = {{ choice.pk }}">
+                <input type="radio" name="choice" value="{{ choice.pk }}" required style="display: none;">
+                <div class="option-letter">{{ 'ABCD'[loop.index0] }}</div>
+                <div class="option-text">{{ choice.text }}</div>
+            </label>
+            {% endfor %}
+        </div>
+
+        <div class="bottom-nav">
+            <button type="submit" class="btn-next"><i class="fas fa-check" style="margin-right: 8px;"></i> Submit Answer</button>
+        </div>
+    </form>
+
+    <div id="answer-result" style="margin-top: 20px;"></div>
+</div>
+
+<a href="javascript:history.back()" class="floating-back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+{% endblock %}

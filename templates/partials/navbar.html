@@ -1,0 +1,48 @@
+<!-- Scrolling Marquee -->
+<div class="scrolling-bar">
+    <div class="scrolling-content">
+        <span>THE BASICS ✦ GENERAL STUDIES ✦ EASILY LEARN ✦ CLEARLY UNDERSTAND ✦ SMARTLY PREPARE ✦ DAILY PRACTICE ✦ CRACK YOUR GOAL ✦ </span>
+        <span>THE BASICS ✦ GENERAL STUDIES ✦ EASILY LEARN ✦ CLEARLY UNDERSTAND ✦ SMARTLY PREPARE ✦ DAILY PRACTICE ✦ CRACK YOUR GOAL ✦ </span>
+    </div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo-container">
+            <a href="{{ url('core:home') }}"><img src="{{ static('images/logo.png') }}" alt="The Basics Logo" class="logo-image"></a>
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="{{ url('core:home') }}" class="{{ 'active' if request.resolver_match.view_name == 'core:home' }}"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="{{ url('content:list') }}"><i class="fas fa-book-open"></i> Learn</a></li>
+            <li><a href="{{ url('prelims:list') }}"><i class="fas fa-clipboard-check"></i> Prelims</a></li>
+            <li><a href="{{ url('mains:list') }}"><i class="fas fa-pen-nib"></i> Mains</a></li>
+            <li><a href="{{ url('current_affairs:list') }}"><i class="far fa-newspaper"></i> News</a></li>
+            <li><a href="{{ url('blog:list') }}"><i class="fas fa-blog"></i> Blogs</a></li>
+            <li><a href="{{ url('billing:plans') }}"><i class="fas fa-crown"></i> Plans</a></li>
+        </ul>
+
+        <div class="nav-right">
+            <span class="nav-divider">|</span>
+            {% if request.user.is_authenticated %}
+            <div class="nav-buttons">
+                <a href="{{ url('accounts:dashboard') }}" class="btn btn-outline">
+                    <span style="font-size:1.1rem;">{{ request.user.profile.avatar }}</span> {{ request.user.profile.first_name_display }}
+                </a>
+                <a href="{{ url('accounts:dashboard') }}" class="btn btn-primary"><i class="fas fa-th-large"></i> My Dashboard</a>
+            </div>
+            <a href="{{ url('accounts:dashboard') }}" class="mobile-login-btn"><i class="fas fa-user"></i> Dashboard</a>
+            {% else %}
+            <div class="nav-buttons">
+                <a href="{{ url('accounts:login') }}" class="btn btn-outline"><i class="fas fa-user"></i> Login</a>
+                <a href="{{ url('accounts:signup') }}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Sign Up</a>
+            </div>
+            <a href="{{ url('accounts:login') }}" class="mobile-login-btn"><i class="fas fa-user"></i> Login</a>
+            {% endif %}
+            <div class="mobile-menu-btn" id="mobileMenuToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </div>
+</nav>

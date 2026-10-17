@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Evaluation Detail | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/evaluation-theme.css') }}">
+{% endblock %}
+{% block content %}
+<div class="ev-container" style="padding-top: 100px;">
+    <div class="ev-header">
+        <a href="{{ url('evaluations:list') }}" class="ev-back"><i class="fas fa-arrow-left"></i></a>
+        <div class="ev-title">Evaluation <span>Detail</span></div>
+    </div>
+
+    <div class="question-box">
+        <div class="qb-meta">
+            <span class="qmeta-tag qmeta-paper">{{ submission.question.paper }}</span>
+            <span class="qmeta-tag qmeta-marks">{{ submission.question.marks }} marks</span>
+        </div>
+        <p class="q-text-main">{{ submission.question.text }}</p>
+    </div>
+
+    <div class="write-card">
+        <div class="write-card-title"><i class="fas fa-file-lines"></i> Your Answer</div>
+        {% if submission.answer_text %}<p style="white-space: pre-wrap; font-family: 'Inter', sans-serif; color: var(--text-main);">{{ submission.answer_text }}</p>{% endif %}
+        {% if submission.answer_image %}<img src="{{ submission.answer_image.url }}" alt="Your submitted answer" style="max-width: 100%; border-radius: 10px; margin-top: 10px;">{% endif %}
+    </div>
+
+    {% if submission.evaluation %}
+    <div class="total-score-box">
+        <span class="ts-label">Your Self-Evaluation Score</span>
+        <span class="ts-value">{{ submission.evaluation.total_score }}/20</span>
+    </div>
+    <div class="write-card">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-main);">
+            <div>Content: <strong>{{ submission.evaluation.content_score }}/5</strong></div>
+            <div>Structure: <strong>{{ submission.evaluation.structure_score }}/5</strong></div>
+            <div>Examples: <strong>{{ submission.evaluation.examples_score }}/5</strong></div>
+            <div>Language: <strong>{{ submission.evaluation.language_score }}/5</strong></div>
+        </div>
+        {% if submission.evaluation.notes %}<p style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.9rem;">{{ submission.evaluation.notes }}</p>{% endif %}
+        <a href="{{ url('evaluations:evaluate', kwargs={'pk': submission.pk}) }}" style="display: inline-block; margin-top: 14px; color: var(--amber); font-weight: 700; font-size: 0.9rem; text-decoration: none;">Edit rating</a>
+    </div>
+    {% else %}
+    <div class="submit-bar">
+        <a href="{{ url('evaluations:evaluate', kwargs={'pk': submission.pk}) }}" class="btn btn-submit-main" style="text-decoration: none;">
+            <i class="fas fa-star"></i> Rate This Answer
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

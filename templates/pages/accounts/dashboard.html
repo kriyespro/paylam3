@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/dashboard-theme.css') }}">
+{% endblock %}
+{% block content %}
+<header class="dash-header" style="margin-top: 70px;">
+    <div class="dash-header-inner">
+        <div class="dash-avatar">{{ profile.avatar }}</div>
+        <div class="dash-welcome">
+            <h1>Welcome back, {{ profile.first_name_display }}!</h1>
+            <p>Target: {{ profile.target_exam }}{% if profile.exam_date %} &bull; Exam: {{ profile.exam_date }}{% endif %}</p>
+        </div>
+        <div class="dash-header-actions">
+            <form method="post" action="{{ url('accounts:logout') }}">
+                {{ csrf_input }}
+                <button type="submit" class="dash-logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<div class="dash-container">
+    <div class="dash-stats-grid">
+        <div class="dash-stat-card"><i class="fas fa-bolt"></i><div class="dash-stat-value">{{ profile.xp }}</div><div class="dash-stat-label">XP</div></div>
+        <div class="dash-stat-card"><i class="fas fa-coins"></i><div class="dash-stat-value">{{ profile.coins }}</div><div class="dash-stat-label">Coins</div></div>
+        <div class="dash-stat-card"><i class="fas fa-fire"></i><div class="dash-stat-value">{{ profile.streak }}</div><div class="dash-stat-label">Day Streak</div></div>
+        <div class="dash-stat-card"><i class="fas fa-question-circle"></i><div class="dash-stat-value">{{ total_attempts }}</div><div class="dash-stat-label">Questions Attempted</div></div>
+        <div class="dash-stat-card"><i class="fas fa-percentage"></i><div class="dash-stat-value">{{ avg_score }}%</div><div class="dash-stat-label">Avg Score</div></div>
+        <div class="dash-stat-card"><i class="fas fa-layer-group"></i><div class="dash-stat-value">{{ subjects_practiced }}</div><div class="dash-stat-label">Subjects Practiced</div></div>
+    </div>
+
+    {% if daily_target %}
+    <div class="dash-progress-wrap">
+        <div class="dash-progress-row"><span>Today's Goal</span><span>{{ today_attempts }} / {{ daily_target }} questions</span></div>
+        <div class="dash-progress-bar"><div class="dash-progress-fill" style="width: {{ daily_progress_pct }}%"></div></div>
+    </div>
+    {% endif %}
+
+    <div class="dash-two-col">
+        <div class="dash-panel">
+            <h2 class="dash-section-title">Topic Breakdown</h2>
+            {% for stat in topic_stats %}
+            <div class="dash-topic-row">
+                <div class="dash-topic-meta">
+                    <span>{{ stat.subject }}{% if stat.topic %} &bull; {{ stat.topic }}{% endif %}</span>
+                    <span>{{ stat.correct }}/{{ stat.total }}</span>
+                </div>
+                <div class="dash-topic-bar"><div class="dash-topic-fill" style="width: {{ (stat.correct / stat.total * 100) if stat.total else 0 }}%"></div></div>
+            </div>
+            {% else %}
+            <p style="font-size: 0.9rem; color: var(--text-muted);">No practice yet — answer a question to see topic-level accuracy here.</p>
+            {% endfor %}
+        </div>
+
+        <div class="dash-panel">
+            <h2 class="dash-section-title">Recent Activity</h2>
+            {% for attempt in recent_attempts %}
+            <a href="{{ url('prelims:practice', kwargs={'pk': attempt.question.pk}) }}" class="dash-activity-row">
+                <span class="dash-activity-text">{{ attempt.question.text|striptags|truncate(50) }}</span>
+                <span class="dash-activity-badge {{ 'correct' if attempt.is_correct else 'incorrect' }}">{{ 'Correct' if attempt.is_correct else 'Incorrect' }}</span>
+            </a>
+            {% else %}
+            <p style="font-size: 0.9rem; color: var(--text-muted);">No activity yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <h2 class="dash-section-title">Continue Learning</h2>
+    <div class="dash-links-grid">
+        <a href="{{ url('prelims:list') }}" class="dash-link-card"><i class="fas fa-check-square"></i><span>Prelims Practice</span></a>
+        <a href="{{ url('mains:list') }}" class="dash-link-card"><i class="fas fa-pen-nib"></i><span>Mains PYQ</span></a>
+        <a href="{{ url('current_affairs:list') }}" class="dash-link-card"><i class="far fa-newspaper"></i><span>Current Affairs</span></a>
+        <a href="{{ url('evaluations:list') }}" class="dash-link-card"><i class="fas fa-clipboard-list"></i><span>My Evaluations</span></a>
+        <a href="{{ url('engagement:bookmarks') }}" class="dash-link-card"><i class="fas fa-bookmark"></i><span>{{ bookmarks_count }} Bookmark{{ 's' if bookmarks_count != 1 else '' }}</span></a>
+        <a href="{{ url('accounts:profile_setup') }}" class="dash-link-card"><i class="fas fa-user-cog"></i><span>Edit Profile</span></a>
+    </div>
+</div>
+{% endblock %}

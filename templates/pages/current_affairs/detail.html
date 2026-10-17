@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ article.title }} | THE BASICS{% endblock %}
+
+{% block extra_head %}
+<style>
+    body { background-color: var(--bg-main); color: var(--text-main); padding-bottom: 80px; }
+    .article-container { max-width: 800px; margin: 0 auto; padding: 20px; min-height: 100vh; background-color: var(--dashboard-bg); box-shadow: var(--card-shadow); }
+    .article-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+    .back-btn { font-size: 1.3rem; color: var(--text-main); cursor: pointer; text-decoration: none; padding: 5px; display: flex; align-items: center; }
+    .article-title { font-size: 1.3rem; font-weight: 700; margin: 0; text-align: center; }
+    .hero-card { background: #0A192F; border-radius: 16px; padding: 25px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+    .hero-meta { display: flex; justify-content: space-between; color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; margin-bottom: 15px; font-weight: 500; }
+    .hero-meta div { display: flex; align-items: center; gap: 8px; }
+    .hero-headline { color: #38BDF8; font-size: 1.4rem; font-weight: 700; margin-bottom: 15px; line-height: 1.4; }
+    .hero-desc { color: rgba(255, 255, 255, 0.9); font-size: 1.05rem; line-height: 1.6; margin-bottom: 20px; }
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+    .tag-pill { background: rgba(56, 189, 248, 0.1); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.2); padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="article-container">
+    <div class="article-header">
+        <a href="{{ url('current_affairs:list') }}" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <h1 class="article-title">Article</h1>
+        <span style="width: 24px;"></span>
+    </div>
+
+    <div class="hero-card">
+        <div class="hero-meta">
+            <div>{% if article.icon %}<i class="{{ article.icon }}"></i>{% endif %} {{ article.get_source_display() if article.source else 'THE BASICS' }}</div>
+            <div><i class="far fa-calendar"></i> {{ article.published_date }}</div>
+        </div>
+        <h2 class="hero-headline">{{ article.title }}</h2>
+        <p class="hero-desc">{{ article.summary }}</p>
+        {% if article.category %}
+        <div class="hero-tags">
+            <span class="tag-pill">{{ article.category }}</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<a href="javascript:history.back()" class="floating-back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+{% endblock %}

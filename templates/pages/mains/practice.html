@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}{{ question.paper }} {{ question.year }} #{{ question.external_id }} | THE BASICS{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/evaluation-theme.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="ev-container" style="padding-top: 100px;" x-data="{ showAnswer: false, wordCount: 0 }">
+    <div class="ev-header">
+        <a href="{{ url('mains:list') }}" class="ev-back"><i class="fas fa-arrow-left"></i></a>
+        <div class="ev-title">Mains <span>Practice</span></div>
+    </div>
+
+    <div class="question-box">
+        <div class="qb-meta">
+            <span class="qmeta-tag qmeta-paper">{{ question.paper }}</span>
+            {% if question.subject %}<span class="qmeta-tag qmeta-subject">{{ question.subject }}</span>{% endif %}
+            <span class="qmeta-tag qmeta-marks">{{ question.marks }} marks</span>
+        </div>
+        <p class="q-text-main">{{ question.text }}</p>
+    </div>
+
+    <div class="write-card">
+        <div class="write-card-title"><i class="fas fa-pen"></i> Write Your Answer</div>
+        {% if request.user.is_authenticated %}
+        <form method="post" action="{{ url('evaluations:submit', kwargs={'question_id': question.pk}) }}" enctype="multipart/form-data">
+            {{ csrf_input }}
+            <textarea
+                name="answer_text"
+                class="answer-textarea"
+                @input="wordCount = $el.value.trim() ? $el.value.trim().split(/\s+/).length : 0"
+                placeholder="Write your answer here."
+            ></textarea>
+            <div class="word-counter"><span x-text="wordCount"></span> words</div>
+
+            <div class="upload-zone" style="margin-top: 16px;">
+                <input type="file" name="answer_image" accept="image/*">
+                <i class="fas fa-camera"></i>
+                <h4>Or upload a photo of your handwritten answer</h4>
+                <p>PNG, JPG up to 5MB</p>
+            </div>
+
+            <div class="submit-bar">
+                <button type="submit" class="btn btn-submit-main"><i class="fas fa-paper-plane"></i> Submit for Self-Evaluation</button>
+            </div>
+        </form>
+        {% else %}
+        <textarea class="answer-textarea" @input="wordCount = $el.value.trim() ? $el.value.trim().split(/\s+/).length : 0" placeholder="Write your answer here."></textarea>
+        <div class="word-counter"><span x-text="wordCount"></span> words</div>
+        <p style="margin-top: 12px; font-size: 0.9rem; color: var(--text-muted);">
+            <a href="{{ url('accounts:login') }}" style="color: var(--amber); font-weight: 600;">Login</a> to submit this for self-evaluation.
+        </p>
+        {% endif %}
+    </div>
+
+    <div class="model-answer-card">
+        <div class="ma-header" style="cursor: pointer;" @click="showAnswer = !showAnswer">
+            <i class="fas fa-book-open"></i>
+            <div>
+                <h3>Model Answer</h3>
+                <div class="ma-meta" x-text="showAnswer ? 'Click to hide' : 'Click to reveal'"></div>
+            </div>
+        </div>
+
+        <div x-show="showAnswer" style="display: none;">
+            {% if question.model_answer.intro %}
+            <div class="ma-section">
+                <div class="ma-section-title"><i class="fas fa-circle-info" style="color: var(--blue);"></i> Introduction</div>
+                <div class="ma-content"><p>{{ question.model_answer.intro|safe }}</p></div>
+            </div>
+            {% endif %}
+
+            {% if question.model_answer.forPoints %}
+            <div class="ma-section">
+                <div class="ma-section-title" style="color: var(--green);"><i class="fas fa-check-circle"></i> In Favor</div>
+                <div class="key-point-list">
+                    {% for point in question.model_answer.forPoints %}
+                    <div class="key-point">
+                        <i class="fas fa-check kp-icon"></i>
+                        <div class="kp-text"><strong>{{ point.head }}:</strong> {{ point.body|safe }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if question.model_answer.againstPoints %}
+            <div class="ma-section">
+                <div class="ma-section-title" style="color: var(--red);"><i class="fas fa-triangle-exclamation"></i> Against / Limitations</div>
+                <div class="key-point-list">
+                    {% for point in question.model_answer.againstPoints %}
+                    <div class="key-point" style="background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.15);">
+                        <i class="fas fa-xmark kp-icon" style="color: var(--red);"></i>
+                        <div class="kp-text"><strong style="color: var(--red);">{{ point.head }}:</strong> {{ point.body|safe }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if question.model_answer.wayForward %}
+            <div class="ma-section">
+                <div class="ma-section-title" style="color: var(--blue);"><i class="fas fa-route"></i> Way Forward</div>
+                <div class="structure-steps">
+                    {% for item in question.model_answer.wayForward %}
+                    <div class="structure-step">
+                        <div class="ss-num">{{ loop.index }}</div>
+                        <div class="ss-content">
+                            <div class="ss-label">{{ item.label }}</div>
+                            <div class="ss-desc">{{ item.desc }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if question.model_answer.conclusion %}
+            <div class="ma-section">
+                <div class="ma-section-title"><i class="fas fa-flag-checkered"></i> Conclusion</div>
+                <div class="ma-content"><p>{{ question.model_answer.conclusion|safe }}</p></div>
+            </div>
+            {% endif %}
+
+            {% if question.model_answer.tags %}
+            <div class="ma-section">
+                <div class="tags-row">
+                    {% for tag in question.model_answer.tags %}
+                    <span class="ma-tag ma-tag-purple">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if question.model_answer.scoreHints %}
+            <div class="ma-section">
+                <div class="score-hint-box">
+                    <div class="score-hint-title"><i class="fas fa-star"></i> Scoring Guide</div>
+                    <div class="score-hints">
+                        {% for hint in question.model_answer.scoreHints %}
+                        <div class="sh-item"><i class="fas fa-check"></i> {{ hint }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<a href="javascript:history.back()" class="floating-back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+{% endblock %}

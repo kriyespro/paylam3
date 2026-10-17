@@ -1,0 +1,44 @@
+/* Ported from index.html's #authModal inline <style> block — the site's
+   real login/signup visual language (dark navy/gold gradient card).
+   Presented as a full page here instead of a modal overlay, since real
+   Django views replaced the client-JS modal (see roadmap.md Phase 2). */
+
+.am-page-wrap {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 140px 20px 60px;
+}
+.am-card {
+    background: linear-gradient(145deg, #0a1a4a, #14378A);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 24px;
+    padding: 36px 40px;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+}
+
+.am-title { color: #fff; font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; font-family: 'Poppins', sans-serif; }
+.am-sub { color: rgba(255,255,255,0.5); font-size: 0.82rem; margin-bottom: 22px; font-family: 'Inter', sans-serif; }
+.am-group { margin-bottom: 15px; }
+.am-group label { display: block; color: rgba(255,255,255,0.65); font-size: 0.78rem; font-weight: 600; margin-bottom: 6px; font-family: 'Poppins', sans-serif; }
+.am-wrap { position: relative; }
+.am-wrap .am-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.35); font-size: 0.85rem; }
+.am-wrap input, .am-wrap select { width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.13); border-radius: 11px; padding: 12px 14px 12px 38px; color: #fff; font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; transition: all .3s; }
+.am-wrap input::placeholder { color: rgba(255,255,255,0.3); }
+.am-wrap input:focus, .am-wrap select:focus { border-color: #FCD148; background: rgba(252,209,72,.07); box-shadow: 0 0 0 3px rgba(252,209,72,.15); }
+
+.am-btn { width: 100%; padding: 13px; background: linear-gradient(135deg,#FCD148,#F09A0A); color: #000F36; border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 700; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all .3s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 18px rgba(252,209,72,.3); text-decoration: none; }
+.am-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(252,209,72,.45); }
+
+.am-alert { padding: 11px 14px; border-radius: 9px; font-size: 0.82rem; font-family: 'Inter', sans-serif; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+.am-alert.err { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3); color: #FCA5A5; }
+.am-alert.ok { background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.3); color: #6EE7B7; }
+
+.am-switch { text-align: center; color: rgba(255,255,255,0.4); font-size: 0.82rem; margin-top: 18px; font-family: 'Poppins', sans-serif; }
+.am-link { background: none; border: none; color: #FCD148; font-size: 0.82rem; font-family: 'Poppins', sans-serif; cursor: pointer; font-weight: 600; text-decoration: none; }
+.am-link:hover { text-decoration: underline; }
+
+.am-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }

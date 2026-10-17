@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Subjects | THE BASICS{% endblock %}
+{% block content %}
+<section class="top-subjects" id="subject" style="padding-top: 140px;">
+    <div class="container">
+        <div class="section-header-row">
+            <div class="header-line"></div>
+            <div class="section-title-pill" style="background: var(--white); color: var(--primary); border: 2px solid var(--primary);">
+                <i class="fas fa-book-open" style="color: var(--primary);"></i> ALL SUBJECTS
+            </div>
+            <div class="header-line-right"></div>
+        </div>
+
+        <div class="subjects-grid">
+            {% for subject in subjects %}
+            <a href="{{ url('content:detail', kwargs={'slug': subject.slug}) }}" class="subject-card">
+                <div class="subject-icon"><i class="{{ subject.icon or 'fas fa-book' }}"></i></div>
+                <h3>{{ subject.name }}</h3>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<a href="javascript:history.back()" class="floating-back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Set Up Your Profile | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/profile-setup-theme.css') }}">
+{% endblock %}
+{% block content %}
+<div class="setup-page-bg"
+     x-data="{
+        step: 1,
+        avatar: '{{ form.avatar.value() or '📚' }}',
+        subjects: {{ (form.subjects.value() or [])|tojson }},
+        toggleSubject(s) { this.subjects.includes(s) ? this.subjects = this.subjects.filter(x => x !== s) : this.subjects.push(s); }
+     }">
+    <div class="setup-card">
+        <div class="steps-bar">
+            <div class="step-dot" :class="step >= 1 ? 'active' : ''">1</div>
+            <div class="step-line" :class="step > 1 ? 'done' : ''"></div>
+            <div class="step-dot" :class="step === 2 ? 'active' : (step > 2 ? 'done' : '')">2</div>
+            <div class="step-line" :class="step > 2 ? 'done' : ''"></div>
+            <div class="step-dot" :class="step === 3 ? 'active' : ''">3</div>
+        </div>
+        <div class="steps-labels">
+            <div class="step-label" :class="step === 1 ? 'active' : ''">Your Profile</div>
+            <div class="step-label" :class="step === 2 ? 'active' : ''">Study Goals</div>
+            <div class="step-label" :class="step === 3 ? 'active' : ''">Subjects</div>
+        </div>
+
+        {% if form.non_field_errors() %}
+        <p style="color: #FCA5A5; margin-bottom: 16px; font-size: 0.85rem;">{% for error in form.non_field_errors() %}{{ error }}{% endfor %}</p>
+        {% endif %}
+
+        <form method="post">
+            {{ csrf_input }}
+            <input type="hidden" name="avatar" :value="avatar">
+
+            <!-- STEP 1 -->
+            <div x-show="step === 1">
+                <div class="panel-title">Set Up Your Profile 🎓</div>
+                <div class="panel-sub">Choose your avatar and display name.</div>
+
+                <div class="avatars-grid">
+                    {% for emoji in ['📚','🦁','🌟','🎯','🚀','🏆','🦋','⚡'] %}
+                    <div class="avatar-option" :class="avatar === '{{ emoji }}' ? 'selected' : ''" @click="avatar = '{{ emoji }}'">{{ emoji }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.display_name.id_for_label }}">Display Name</label>
+                    <div class="input-wrap"><i class="fas fa-user"></i>{{ form.display_name }}</div>
+                </div>
+
+                <div class="btn-row">
+                    <button type="button" class="btn-next" style="flex:1;" @click="step = 2">Continue <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div x-show="step === 2" style="display: none;">
+                <div class="panel-title">Set Your Study Goals 📅</div>
+                <div class="panel-sub">We'll track your progress against these targets.</div>
+
+                <div class="form-group">
+                    <label for="{{ form.study_goal_hours.id_for_label }}">Daily Study Target</label>
+                    <div class="input-wrap"><i class="fas fa-clock"></i>{{ form.study_goal_hours }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.exam_date.id_for_label }}">Exam Date (approximate)</label>
+                    <div class="input-wrap"><i class="fas fa-calendar-alt"></i>{{ form.exam_date }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.daily_q_target.id_for_label }}">Daily Questions Target</label>
+                    <div class="input-wrap"><i class="fas fa-question-circle"></i>{{ form.daily_q_target }}</div>
+                </div>
+
+                <div class="btn-row">
+                    <button type="button" class="btn-back" @click="step = 1"><i class="fas fa-arrow-left"></i> Back</button>
+                    <button type="button" class="btn-next" @click="step = 3">Continue <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div x-show="step === 3" style="display: none;">
+                <div class="panel-title">Pick Your Subjects 📖</div>
+                <div class="panel-sub">Select the subjects you want to focus on.</div>
+                <div class="chip-hint">Select all that apply &rarr;</div>
+
+                <div class="subjects-grid">
+                    {% for value, label in form.subjects.field.choices %}
+                    <label class="subject-chip" :class="subjects.includes('{{ value }}') ? 'selected' : ''">
+                        <input type="checkbox" name="subjects" value="{{ value }}" style="display:none;" @click="toggleSubject('{{ value }}')" :checked="subjects.includes('{{ value }}')">
+                        {{ label }}
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <div class="btn-row">
+                    <button type="button" class="btn-back" @click="step = 2"><i class="fas fa-arrow-left"></i> Back</button>
+                    <button type="submit" class="btn-next"><i class="fas fa-check"></i> Go to Dashboard!</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

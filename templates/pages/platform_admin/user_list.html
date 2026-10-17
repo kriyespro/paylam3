@@ -1,0 +1,45 @@
+{% extends "pages/platform_admin/base.html" %}
+{% block title %}Users{% endblock %}
+{% block page_title %}Users{% endblock %}
+{% block content %}
+<p class="pa-note" style="margin-bottom:16px;">Read-only — password resets and account status changes happen in the advanced admin at <a href="/sd/" target="_blank" style="color:var(--secondary);">/sd/</a>.</p>
+
+<div class="pa-table-wrap">
+    <table class="pa-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Target Exam</th>
+                <th>XP</th>
+                <th>Attempts</th>
+                <th>Bookmarks</th>
+                <th>Joined</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in object_list %}
+            <tr>
+                <td>{{ u.profile.display_name or '—' }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.profile.target_exam }}</td>
+                <td>{{ u.profile.xp }}</td>
+                <td>{{ u.attempt_count }}</td>
+                <td>{{ u.bookmark_count }}</td>
+                <td>{{ u.date_joined.date() }}</td>
+            </tr>
+            {% else %}
+            <tr class="pa-empty-row"><td colspan="7">No users yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<div style="display:flex;gap:10px;margin-top:18px;">
+    {% if page_obj.has_previous() %}<a href="?page={{ page_obj.previous_page_number() }}" class="pa-btn pa-btn-secondary">&larr; Prev</a>{% endif %}
+    <span style="padding:10px 6px;font-size:0.85rem;color:var(--text-muted);">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next() %}<a href="?page={{ page_obj.next_page_number() }}" class="pa-btn pa-btn-secondary">Next &rarr;</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

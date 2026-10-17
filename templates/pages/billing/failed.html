@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Payment Failed | THE BASICS{% endblock %}
+{% block content %}
+<div style="padding: 140px 20px 80px; max-width: 480px; margin: 0 auto; text-align: center;">
+    <i class="fas fa-times-circle" style="font-size: 3rem; color: #ef4444; margin-bottom: 16px;"></i>
+    <h1 style="color: var(--primary); font-size: 1.6rem; margin-bottom: 8px;">Payment Could Not Be Verified</h1>
+    <p style="color: var(--text-muted); margin-bottom: 24px;">No amount was captured, or verification failed. If money was deducted, it will auto-refund — no plan was activated.</p>
+    <a href="{{ url('billing:plans') }}" style="display: inline-block; padding: 12px 28px; border-radius: 8px; background: var(--primary); color: var(--white); font-weight: 700; text-decoration: none;">Back to Plans</a>
+</div>
+{% endblock %}

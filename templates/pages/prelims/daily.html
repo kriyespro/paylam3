@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Today's Question | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/evaluation-theme.css') }}">
+{% endblock %}
+{% block content %}
+<div class="ev-container" style="padding-top: 100px;">
+    <div class="ev-header">
+        <a href="{{ url('prelims:list') }}" class="ev-back"><i class="fas fa-arrow-left"></i></a>
+        <div class="ev-title">Today's <span>Question</span></div>
+    </div>
+
+    {% if daily %}
+    <div class="question-box">
+        <div class="qb-meta">
+            <span class="qmeta-tag qmeta-marks">{{ daily.xp }} XP &bull; {{ daily.coins }} coins</span>
+        </div>
+        <p class="q-text-main">{{ daily.question.text|safe }}</p>
+    </div>
+    <div class="submit-bar">
+        <a href="{{ url('prelims:practice', kwargs={'pk': daily.question.pk}) }}" class="btn btn-submit-main" style="text-decoration: none;">
+            <i class="fas fa-pen"></i> Answer Now
+        </a>
+    </div>
+    {% else %}
+    <p style="color: var(--text-muted);">No questions available yet.</p>
+    {% endif %}
+</div>
+
+<a href="javascript:history.back()" class="floating-back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+{% endblock %}

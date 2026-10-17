@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} | THE BASICS{% endblock %}
+{% block content %}
+<section style="padding: 140px 20px 80px; background: var(--bg-main); min-height: 60vh;">
+    <div class="container" style="max-width: 800px; margin: 0 auto;">
+        <div class="news-card" style="padding: 30px;">
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">{{ post.published_date }}</p>
+            <h1 style="font-size: 1.8rem; margin-bottom: 20px; color: var(--text-main);">{{ post.title }}</h1>
+            <div style="color: var(--text-main); line-height: 1.7; white-space: pre-wrap;">{{ post.body }}</div>
+        </div>
+        <a href="{{ url('blog:list') }}" class="back-btn" style="margin-top: 20px; display: inline-block; color: var(--primary); font-weight: 600;"><i class="fas fa-arrow-left"></i> Back to Blogs</a>
+    </div>
+</section>
+{% endblock %}

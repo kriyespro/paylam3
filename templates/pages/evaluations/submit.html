@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Submit Answer | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/evaluation-theme.css') }}">
+{% endblock %}
+{% block content %}
+<div class="ev-container" style="padding-top: 100px;">
+    <div class="ev-header">
+        <a href="{{ url('mains:practice', kwargs={'pk': question.pk}) }}" class="ev-back"><i class="fas fa-arrow-left"></i></a>
+        <div class="ev-title">Submit <span>Answer</span></div>
+    </div>
+
+    <div class="question-box">
+        <div class="qb-meta">
+            <span class="qmeta-tag qmeta-paper">{{ question.paper }}</span>
+            <span class="qmeta-tag qmeta-marks">{{ question.marks }} marks</span>
+        </div>
+        <p class="q-text-main">{{ question.text }}</p>
+    </div>
+
+    {% if form.non_field_errors() %}
+    <div class="self-eval-intro" style="background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25);">
+        <i class="fas fa-circle-exclamation" style="color: var(--red);"></i>
+        <div>{% for error in form.non_field_errors() %}{{ error }}{% endfor %}</div>
+    </div>
+    {% endif %}
+
+    <div class="write-card">
+        <div class="write-card-title"><i class="fas fa-pen"></i> Your Answer</div>
+        <form method="post" enctype="multipart/form-data">
+            {{ csrf_input }}
+            {{ form.answer_text }}
+            {% for error in form.answer_text.errors %}<p style="color: var(--red); font-size: 0.85rem; margin-top: 6px;">{{ error }}</p>{% endfor %}
+
+            <div class="or-divider">OR</div>
+
+            <div class="upload-zone">
+                {{ form.answer_image }}
+                <i class="fas fa-camera"></i>
+                <h4>Upload a photo of your handwritten answer</h4>
+                <p>PNG, JPG up to 5MB</p>
+            </div>
+            {% for error in form.answer_image.errors %}<p style="color: var(--red); font-size: 0.85rem; margin-top: -10px; margin-bottom: 16px;">{{ error }}</p>{% endfor %}
+
+            <div class="submit-bar">
+                <button type="submit" class="btn btn-submit-main"><i class="fas fa-paper-plane"></i> Submit for Self-Evaluation</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

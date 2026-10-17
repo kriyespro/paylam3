@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin{% endblock %} | THE BASICS</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+    <link rel="stylesheet" href="{{ static('css/platform-admin-theme.css') }}">
+    <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="pa-body">
+    <div class="pa-shell">
+        <aside class="pa-sidebar">
+            <div class="pa-sidebar-brand">
+                <img src="{{ static('images/logo.png') }}" alt="Logo">
+                <span>THE BASICS</span>
+            </div>
+            <div class="pa-sidebar-tag">Content Dashboard</div>
+
+            <nav class="pa-nav">
+                <a href="{{ url('platform_admin:home') }}" class="{{ 'active' if active == 'home' }}"><i class="fas fa-gauge"></i> Dashboard</a>
+                <a href="{{ url('platform_admin:analytics') }}" class="{{ 'active' if active == 'analytics' }}"><i class="fas fa-chart-simple"></i> Analytics</a>
+
+                <div class="pa-nav-section">Content</div>
+                <a href="{{ url('platform_admin:article_list') }}" class="{{ 'active' if active == 'articles' }}"><i class="far fa-newspaper"></i> Current Affairs</a>
+                <a href="{{ url('platform_admin:post_list') }}" class="{{ 'active' if active == 'posts' }}"><i class="fas fa-blog"></i> Blog Posts</a>
+                <a href="{{ url('platform_admin:subject_list') }}" class="{{ 'active' if active == 'subjects' }}"><i class="fas fa-book-open"></i> Subjects</a>
+
+                <div class="pa-nav-section">Questions</div>
+                <a href="{{ url('platform_admin:question_list') }}" class="{{ 'active' if active == 'questions' }}"><i class="fas fa-check-square"></i> Prelims Questions</a>
+                <a href="{{ url('platform_admin:mains_question_list') }}" class="{{ 'active' if active == 'mains_questions' }}"><i class="fas fa-pen-nib"></i> Mains Questions</a>
+
+                <div class="pa-nav-section">People</div>
+                <a href="{{ url('platform_admin:user_list') }}" class="{{ 'active' if active == 'users' }}"><i class="fas fa-users"></i> Users</a>
+            </nav>
+
+            <div class="pa-sidebar-footer">
+                <a href="/sd/" target="_blank"><i class="fas fa-database"></i> Advanced Admin (/sd/)</a>
+                <a href="{{ url('core:home') }}"><i class="fas fa-arrow-left"></i> Back to Site</a>
+                <form method="post" action="{{ url('accounts:logout') }}">
+                    {{ csrf_input }}
+                    <button type="submit" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;background:none;border:none;width:100%;text-align:left;cursor:pointer;color:rgba(255,255,255,0.55);font-size:0.82rem;font-family:inherit;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <div class="pa-main">
+            <header class="pa-topbar">
+                <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+                <div class="pa-topbar-user">
+                    <span><strong>{{ request.user.profile.display_name or request.user.get_username() }}</strong></span>
+                    <span class="pa-badge">{{ 'Superadmin' if request.user.is_superuser else 'Staff' }}</span>
+                </div>
+            </header>
+
+            <div class="pa-content">
+                {% if messages %}
+                <div class="pa-messages">
+                    {% for message in messages %}
+                    <div class="pa-message {{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

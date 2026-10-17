@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}THE BASICS | UPSC Preparation{% endblock %}
+{% block meta_description %}THE BASICS - Your ultimate destination for UPSC preparation. Daily news, MCQs, and comprehensive subject resources.{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero" id="home">
+    <div class="hero-bg">
+        <img src="{{ static('images/hero_bg_landscape.jpg') }}" class="hero-landscape" alt="hero background">
+        <img src="{{ static('images/hero_bg_portrait.jpg') }}" class="hero-portrait" alt="hero background mobile">
+    </div>
+    <div class="hero-content">
+
+        <!-- Premium Typewriter Auto-Changing Text -->
+        <div class="premium-typewriter-container">
+            <span id="typewriter-text"></span><span class="blinking-cursor"></span>
+        </div>
+
+        <h1 class="main-title">THE <span>BASICS</span></h1>
+
+        <h2 class="sub-title">General Studies</h2>
+        <div class="tagline-container">
+            <div class="tag-line"></div>
+            <p class="tagline">Easily Learn. Clearly Understand. Smartly Prepare.</p>
+            <div class="tag-line"></div>
+        </div>
+
+        <div class="hero-cta-buttons" style="display: flex; gap: 15px; margin-top: 30px; margin-bottom: 30px;">
+            <a href="{{ url('content:list') }}" class="btn btn-primary" style="font-size: 1.1rem; padding: 12px 30px;">Start Learning <i class="fas fa-arrow-right"></i></a>
+            <a href="{{ url('prelims:list') }}" class="btn btn-outline-dark" style="font-size: 1.1rem; padding: 12px 30px;">Practice MCQs <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <div class="hero-category-pills">
+            <a href="{{ url('content:list') }}" class="hero-pill-btn"><i class="fas fa-university"></i> UPSC / PSC</a>
+            <a href="{{ url('content:list') }}" class="hero-pill-btn"><i class="fas fa-building-columns"></i> Banking</a>
+            <a href="{{ url('content:list') }}" class="hero-pill-btn"><i class="fas fa-users"></i> SSC / CGL</a>
+            <a href="{{ url('content:list') }}" class="hero-pill-btn"><i class="fas fa-train"></i> Railway (RRB)</a>
+            <a href="{{ url('content:list') }}" class="hero-pill-btn"><i class="fas fa-border-all"></i> Others</a>
+        </div>
+
+    </div>
+</section>
+
+<!-- Top Subjects -->
+<section class="top-subjects" id="subject">
+    <div class="container">
+        <div class="section-header-row">
+            <div class="header-line"></div>
+            <div class="section-title-pill" style="background: var(--white); color: var(--primary); border: 2px solid var(--primary);">
+                <i class="fas fa-book-open" style="color: var(--primary);"></i> TOP SUBJECTS
+            </div>
+            <div class="header-line-right"></div>
+        </div>
+
+        <div class="subjects-grid">
+            {% for subject in subjects %}
+            <a href="{{ url('content:detail', kwargs={'slug': subject.slug}) }}" class="subject-card">
+                <div class="subject-icon"><i class="{{ subject.icon or 'fas fa-book' }}"></i></div>
+                <h3>{{ subject.name }}</h3>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<section class="footer-cta">
+    <div class="container" style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <h2 class="cta-heading" style="text-align: center;">Ready to Crack Your Dream Exam?</h2>
+        <p class="cta-desc" style="text-align: center; margin: 0 auto;">Join thousands of aspirants preparing for UPSC, State PSC, SSC, Banking and Railway with structured learning.</p>
+        <div class="cta-buttons" style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
+            <a href="{{ url('content:list') }}" class="btn" style="background: #D4AF37; border: none; color: #000; padding: 12px 30px; font-weight: 700; border-radius: 30px;">Start Learning</a>
+            <a href="https://whatsapp.com/channel/0029VbD3NvLKLaHszgpIiI29" target="_blank" rel="noopener noreferrer" class="btn" style="background: #25D366; border: none; color: white; padding: 12px 30px; font-weight: 700; border-radius: 30px;"><i class="fab fa-whatsapp"></i> Join WhatsApp Channel</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

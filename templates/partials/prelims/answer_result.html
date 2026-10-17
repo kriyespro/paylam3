@@ -1,0 +1,18 @@
+{% if is_correct %}
+<div class="explanation-box correct-box">
+    <div class="explanation-header"><i class="fas fa-check-circle"></i> Correct!</div>
+    {% if question.explanation %}<div class="explanation-text">{{ question.explanation|safe }}</div>{% endif %}
+</div>
+{% else %}
+<div class="explanation-box wrong-box">
+    <div class="explanation-header"><i class="fas fa-times-circle"></i> Not quite.</div>
+    {% if correct_choice %}<p class="explanation-text" style="margin-bottom: 8px;">Correct answer: <strong>{{ correct_choice.text }}</strong></p>{% endif %}
+    {% if question.explanation %}<div class="explanation-text">{{ question.explanation|safe }}</div>{% endif %}
+</div>
+{% endif %}
+
+{% if next_question %}
+<a href="{{ url('prelims:practice', kwargs={'pk': next_question.pk}) }}" class="btn-next" style="margin-top: 16px; display: inline-flex; align-items: center;">
+    Next Question <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+</a>
+{% endif %}

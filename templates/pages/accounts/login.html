@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Login | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/auth-theme.css') }}">
+{% endblock %}
+{% block content %}
+<div class="am-page-wrap">
+    <div class="am-card">
+        <div class="am-title">Welcome Back</div>
+        <div class="am-sub">Login to continue your preparation.</div>
+
+        {% if google_client_id %}
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <div id="g_id_onload"
+             data-client_id="{{ google_client_id }}"
+             data-login_uri="{{ url('accounts:google_login') }}"
+             data-auto_prompt="false"></div>
+        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
+             data-text="signin_with" data-size="large" data-width="320" style="margin: 0 auto 16px; width: 320px;"></div>
+        <div class="am-sub" style="margin: 16px 0; text-align: center; opacity: 0.6;">or use your email</div>
+        {% endif %}
+
+        {% if form.non_field_errors() %}
+        <div class="am-alert err show">{% for error in form.non_field_errors() %}{{ error }}{% endfor %}</div>
+        {% endif %}
+
+        <form method="post">
+            {{ csrf_input }}
+
+            <div class="am-group">
+                <label for="{{ form.username.id_for_label }}">Email Address</label>
+                <div class="am-wrap"><i class="fas fa-envelope am-icon"></i>{{ form.username }}</div>
+                {% for error in form.username.errors %}<div class="am-alert err show" style="margin-top: 6px; margin-bottom: 0;">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="am-group">
+                <label for="{{ form.password.id_for_label }}">Password</label>
+                <div class="am-wrap"><i class="fas fa-lock am-icon"></i>{{ form.password }}</div>
+                {% for error in form.password.errors %}<div class="am-alert err show" style="margin-top: 6px; margin-bottom: 0;">{{ error }}</div>{% endfor %}
+            </div>
+
+            <button type="submit" class="am-btn"><i class="fas fa-sign-in-alt"></i> Login to Dashboard</button>
+        </form>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 16px;">
+            <a href="{{ url('accounts:password_reset') }}" class="am-link" style="color: rgba(255,255,255,0.4);">Forgot password?</a>
+            <a href="{{ url('accounts:signup') }}" class="am-link">Create account</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

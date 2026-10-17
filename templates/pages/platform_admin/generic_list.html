@@ -1,0 +1,53 @@
+{% extends "pages/platform_admin/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="pa-toolbar">
+    <div>{% if note %}<p class="pa-note" style="margin:0;">{{ note }}</p>{% endif %}</div>
+    {% if create_url %}
+    <a href="{{ create_url }}" class="pa-btn pa-btn-primary"><i class="fas fa-plus"></i> Add New</a>
+    {% endif %}
+</div>
+
+<div class="pa-table-wrap">
+    <table class="pa-table">
+        <thead>
+            <tr>
+                {% for label, attr in columns %}<th>{{ label }}</th>{% endfor %}
+                <th style="text-align:right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in object_list %}
+            <tr>
+                {% for label, attr in columns %}
+                <td>
+                    {% if loop.first and edit_url_name %}
+                    <a href="{{ url(edit_url_name, kwargs={'pk': obj.pk}) }}" style="color: var(--text-main); font-weight: 600; text-decoration: none;">{{ attr_value(obj, attr) }}</a>
+                    {% else %}
+                    {{ attr_value(obj, attr) }}
+                    {% endif %}
+                </td>
+                {% endfor %}
+                <td>
+                    <div class="pa-table-actions" style="justify-content:flex-end;">
+                        {% if edit_url_name %}<a href="{{ url(edit_url_name, kwargs={'pk': obj.pk}) }}" class="pa-link-edit">Edit</a>{% endif %}
+                        {% if delete_url_name %}<a href="{{ url(delete_url_name, kwargs={'pk': obj.pk}) }}" class="pa-link-delete">Delete</a>{% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr class="pa-empty-row"><td colspan="{{ columns|length + 1 }}">Nothing here yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<div style="display:flex;gap:10px;margin-top:18px;">
+    {% if page_obj.has_previous() %}<a href="?page={{ page_obj.previous_page_number() }}" class="pa-btn pa-btn-secondary">&larr; Prev</a>{% endif %}
+    <span style="padding:10px 6px;font-size:0.85rem;color:var(--text-muted);">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next() %}<a href="?page={{ page_obj.next_page_number() }}" class="pa-btn pa-btn-secondary">Next &rarr;</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

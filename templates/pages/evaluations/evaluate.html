@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Self-Evaluate | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/evaluation-theme.css') }}">
+{% endblock %}
+{% block content %}
+<div class="ev-container" style="padding-top: 100px;"
+     x-data="{
+        scores: { content: {{ form.content_score.value() or 0 }}, structure: {{ form.structure_score.value() or 0 }}, examples: {{ form.examples_score.value() or 0 }}, language: {{ form.language_score.value() or 0 }} },
+        get total() { return this.scores.content + this.scores.structure + this.scores.examples + this.scores.language; }
+     }">
+    <div class="ev-header">
+        <a href="{{ url('mains:practice', kwargs={'pk': submission.question.pk}) }}" class="ev-back"><i class="fas fa-arrow-left"></i></a>
+        <div class="ev-title">Self <span>Evaluate</span></div>
+    </div>
+
+    <div class="question-box">
+        <div class="write-card-title" style="margin-bottom: 10px;"><i class="fas fa-file-lines"></i> Your Answer</div>
+        {% if submission.answer_text %}<p class="q-text-main" style="white-space: pre-wrap;">{{ submission.answer_text }}</p>{% endif %}
+        {% if submission.answer_image %}<img src="{{ submission.answer_image.url }}" alt="Your submitted answer" style="max-width: 100%; border-radius: 10px; margin-top: 10px;">{% endif %}
+    </div>
+
+    <div class="self-eval-intro">
+        <i class="fas fa-circle-info"></i>
+        <div>Rate your own answer honestly against the model answer. This is self-assessment, not an official score.</div>
+    </div>
+
+    <form method="post">
+        {{ csrf_input }}
+
+        <div class="eval-criteria">
+            {% for field, label, key, icon in [(form.content_score, 'Content', 'content', 'fa-lightbulb'), (form.structure_score, 'Structure', 'structure', 'fa-diagram-project'), (form.examples_score, 'Examples', 'examples', 'fa-list-check'), (form.language_score, 'Language', 'language', 'fa-pen-fancy')] %}
+            <div class="eval-criterion-card">
+                <div class="ec-header">
+                    <span class="ec-label"><i class="fas {{ icon }}" style="color: var(--amber);"></i> {{ label }}</span>
+                    <span class="ec-max">out of 5</span>
+                </div>
+                <div class="star-row">
+                    {% for i in range(1, 6) %}
+                    <button type="button" class="star-btn" :class="scores.{{ key }} >= {{ i }} ? 'selected' : ''" @click="scores.{{ key }} = {{ i }}">{{ i }}</button>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="{{ field.html_name }}" :value="scores.{{ key }}">
+                {% for error in field.errors %}<p style="color: var(--red); font-size: 0.8rem; margin-top: 6px;">{{ error }}</p>{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="total-score-box">
+            <span class="ts-label">Total Score</span>
+            <span class="ts-value"><span x-text="total"></span>/20</span>
+        </div>
+
+        {{ form.notes }}
+
+        <div class="submit-bar">
+            <button type="submit" class="btn btn-submit-main"><i class="fas fa-check"></i> Save Evaluation</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

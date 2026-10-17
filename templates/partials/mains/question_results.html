@@ -1,0 +1,32 @@
+<div id="question-results" style="display: flex; flex-direction: column; gap: 12px;">
+    {% for question in questions %}
+    <a href="{{ url('mains:practice', kwargs={'pk': question.pk}) }}" class="question-box" style="display: block; text-decoration: none; margin-bottom: 0;">
+        <div class="qb-meta">
+            <span class="qmeta-tag qmeta-paper">{{ question.paper }}</span>
+            {% if question.subject %}<span class="qmeta-tag qmeta-subject">{{ question.subject }}</span>{% endif %}
+            <span class="qmeta-tag qmeta-marks">{{ question.year }} &bull; {{ question.marks }} marks</span>
+        </div>
+        <p class="q-text-main" style="font-size: 0.98rem;">{{ question.text }}</p>
+    </a>
+    {% else %}
+    <p style="color: var(--text-muted);">No questions match those filters.</p>
+    {% endfor %}
+
+    {% if page_obj.has_other_pages() %}
+    <div style="display:flex; justify-content:center; gap:10px; margin-top:10px;">
+        {% if page_obj.has_previous() %}
+        <a href="?paper={{ selected_paper }}&subject={{ selected_subject }}&year={{ selected_year }}&page={{ page_obj.previous_page_number() }}"
+           hx-get="{{ url('mains:list') }}?paper={{ selected_paper }}&subject={{ selected_subject }}&year={{ selected_year }}&page={{ page_obj.previous_page_number() }}"
+           hx-target="#question-results" hx-swap="outerHTML" hx-push-url="true"
+           class="btn-next" style="flex:none; padding:8px 18px; font-size:0.85rem;">&larr; Prev</a>
+        {% endif %}
+        <span style="padding:8px 6px; font-size:0.85rem; color:var(--text-muted);">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next() %}
+        <a href="?paper={{ selected_paper }}&subject={{ selected_subject }}&year={{ selected_year }}&page={{ page_obj.next_page_number() }}"
+           hx-get="{{ url('mains:list') }}?paper={{ selected_paper }}&subject={{ selected_subject }}&year={{ selected_year }}&page={{ page_obj.next_page_number() }}"
+           hx-target="#question-results" hx-swap="outerHTML" hx-push-url="true"
+           class="btn-next" style="flex:none; padding:8px 18px; font-size:0.85rem;">Next &rarr;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>

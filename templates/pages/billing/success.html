@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Payment Successful | THE BASICS{% endblock %}
+{% block content %}
+<div style="padding: 140px 20px 80px; max-width: 480px; margin: 0 auto; text-align: center;">
+    <i class="fas fa-check-circle" style="font-size: 3rem; color: #10b981; margin-bottom: 16px;"></i>
+    <h1 style="color: var(--primary); font-size: 1.6rem; margin-bottom: 8px;">Payment Successful</h1>
+    <p style="color: var(--text-muted); margin-bottom: 24px;">Your plan is active. Time to get started.</p>
+    <a href="{{ url('accounts:dashboard') }}" style="display: inline-block; padding: 12px 28px; border-radius: 8px; background: var(--primary); color: var(--white); font-weight: 700; text-decoration: none;">Go to Dashboard</a>
+</div>
+{% endblock %}

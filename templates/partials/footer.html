@@ -1,0 +1,127 @@
+<footer class="premium-footer">
+    <div class="container">
+        <div class="footer-top">
+            <div class="footer-col brand-col">
+                <h2 class="footer-logo">THE BASICS</h2>
+                <p class="footer-tag">Learn &bull; Prepare &bull; Succeed</p>
+                <p class="footer-desc">India's modern learning platform for UPSC, State PSC, SSC, Banking, Railway and Competitive Exams.</p>
+                <style>
+                    .social-icons { display: flex; gap: 12px; margin-top: 25px; flex-wrap: wrap; }
+                    .social-icons a { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: white; text-decoration: none; transition: all 0.3s ease; }
+                    .social-icons a.facebook { background: #1877F2; box-shadow: 0 4px 10px rgba(24, 119, 242, 0.3); }
+                    .social-icons a.instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); box-shadow: 0 4px 10px rgba(214, 36, 159, 0.3); }
+                    .social-icons a.youtube { background: #FF0000; box-shadow: 0 4px 10px rgba(255, 0, 0, 0.3); }
+                    .social-icons a.telegram { background: #0088cc; box-shadow: 0 4px 10px rgba(0, 136, 204, 0.3); }
+                    .social-icons a.whatsapp { background: #25D366; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
+                    .social-icons a.linkedin { background: #0A66C2; box-shadow: 0 4px 10px rgba(10, 102, 194, 0.3); }
+                    .social-icons a:hover { transform: translateY(-4px); }
+                </style>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/profile.php?id=61593464977344" target="_blank" rel="noopener noreferrer" class="facebook" title="Follow us on Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com/thebasics2027?igsi=MXJlcmZ0dGtzcmMxaw==" target="_blank" rel="noopener noreferrer" class="instagram" title="Follow us on Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://youtube.com/@thebasicsgeneralstudies?si=uGpCt7beK5QuALwD" target="_blank" rel="noopener noreferrer" class="youtube" title="Subscribe on YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="https://t.me/thebasics27" target="_blank" rel="noopener noreferrer" class="telegram" title="Join our Telegram Channel"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="https://whatsapp.com/channel/0029VbD3NvLKLaHszgpIiI29" target="_blank" rel="noopener noreferrer" class="whatsapp" title="Join our WhatsApp Channel"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" class="linkedin" title="Follow us on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col links-col">
+                <h3>Quick Links</h3>
+                <ul class="nested-footer-links">
+                    <li><a href="{{ url('core:home') }}" style="color: var(--gold, #D4AF37); font-weight: 600;">Home</a></li>
+                    <li style="margin-top: 8px;">
+                        <style>
+                            details.footer-acc summary { list-style: none; cursor: pointer; color: var(--gold, #D4AF37); font-weight: 600; display: inline-flex; align-items: center; gap: 5px; outline: none; }
+                            details.footer-acc summary::-webkit-details-marker { display: none; }
+                            details.footer-acc[open] summary i { transform: rotate(180deg); }
+                        </style>
+                        <details class="footer-acc">
+                            <summary>Learn <i class="fas fa-chevron-down" style="font-size: 10px; transition: transform 0.3s;"></i></summary>
+                            <ul style="padding-left: 15px; margin-top: 5px; list-style-type: disc;">
+                                {% for subject in footer_subjects %}
+                                <li><a href="{{ url('content:detail', kwargs={'slug': subject.slug}) }}">{{ subject.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </details>
+                    </li>
+                    <li style="margin-top: 8px;">
+                        <details class="footer-acc">
+                            <summary>Prelims <i class="fas fa-chevron-down" style="font-size: 10px; transition: transform 0.3s;"></i></summary>
+                            <ul style="padding-left: 15px; margin-top: 5px; list-style-type: disc;">
+                                <li><a href="{{ url('prelims:list') }}">PYQ</a></li>
+                                <li><a href="{{ url('prelims:list') }}">MCQ</a></li>
+                                <li><a href="{{ url('current_affairs:list') }}">News</a></li>
+                                <li><a href="{{ url('prelims:daily') }}">Daily Question</a></li>
+                            </ul>
+                        </details>
+                    </li>
+                    <li style="margin-top: 8px;">
+                        <details class="footer-acc">
+                            <summary>Mains <i class="fas fa-chevron-down" style="font-size: 10px; transition: transform 0.3s;"></i></summary>
+                            <ul style="padding-left: 15px; margin-top: 5px; list-style-type: disc;">
+                                <li><a href="{{ url('mains:list') }}">Mains PYQ</a></li>
+                                <li><a href="{{ url('mains:daily') }}">Daily Mains</a></li>
+                                {% if request.user.is_authenticated %}
+                                <li><a href="{{ url('evaluations:list') }}">My Evaluations</a></li>
+                                {% endif %}
+                            </ul>
+                        </details>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="footer-col links-col">
+                <h3>Exam Categories</h3>
+                <ul>
+                    <li><a href="#">UPSC</a></li>
+                    <li><a href="#">State PSC</a></li>
+                    <li><a href="#">SSC CGL</a></li>
+                    <li><a href="#">Banking</a></li>
+                    <li><a href="#">Railway (RRB)</a></li>
+                    <li><a href="#">Other Exams</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col links-col">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="{{ url('content:list') }}">Study Notes</a></li>
+                    <li><a href="{{ url('prelims:list') }}">PYQs</a></li>
+                    <li><a href="{{ url('prelims:list') }}">MCQs</a></li>
+                    <li><a href="{{ url('current_affairs:list') }}">Daily News</a></li>
+                    <li><a href="{{ url('blog:list') }}">Blogs</a></li>
+                    {% if request.user.is_authenticated %}
+                    <li><a href="{{ url('engagement:bookmarks') }}">My Bookmarks</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-middle">
+            <div class="contact-info">
+                <div class="contact-item"><i class="fas fa-envelope"></i> support@thebasicsgs.com</div>
+                <div class="contact-item"><i class="fas fa-map-marker-alt"></i> Surat, Gujarat</div>
+            </div>
+        </div>
+
+        <div class="trust-metrics">
+            <span><i class="fas fa-users"></i> Growing Community</span>
+            <span><i class="fas fa-sync"></i> Daily Updated Content</span>
+            <span><i class="fas fa-book-open"></i> Free Notes</span>
+            <span><i class="fas fa-check-circle"></i> Practice MCQs</span>
+            <span><i class="fas fa-clock"></i> 24×7 Access</span>
+            <span><i class="fas fa-mobile-alt"></i> Mobile Friendly</span>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; <span id="copyrightYear">2026</span> THE BASICS. All Rights Reserved.</p>
+            <div class="bottom-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms &amp; Conditions</a>
+                <a href="#">Refund Policy</a>
+                <a href="#">Disclaimer</a>
+            </div>
+        </div>
+    </div>
+</footer>

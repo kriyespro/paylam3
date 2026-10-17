@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found | THE BASICS{% endblock %}
+{% block content %}
+<section style="min-height: 60vh; display: flex; align-items: center; justify-content: center; padding: 100px 20px;">
+    <div style="text-align: center; max-width: 480px;">
+        <div style="font-size: 5rem; font-weight: 800; color: var(--primary); font-family: 'Poppins', sans-serif;">404</div>
+        <h1 style="font-size: 1.4rem; font-weight: 700; color: var(--text-main); margin: 10px 0;">Page Not Found</h1>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">The page you're looking for doesn't exist or may have moved.</p>
+        <a href="{{ url('core:home') }}" class="btn btn-primary">Back to Home</a>
+    </div>
+</section>
+{% endblock %}

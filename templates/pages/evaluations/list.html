@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}My Evaluations | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/evaluation-theme.css') }}">
+{% endblock %}
+{% block content %}
+<div class="ev-container" style="padding-top: 100px;">
+    <div class="ev-header">
+        <div class="ev-title">My <span>Evaluations</span></div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        {% for submission in submissions %}
+        <a href="{{ url('evaluations:detail', kwargs={'pk': submission.pk}) }}" class="question-box" style="display: block; text-decoration: none; margin-bottom: 0;">
+            <div class="qb-meta">
+                <span class="qmeta-tag qmeta-paper">{{ submission.question.paper }}</span>
+                <span class="qmeta-tag qmeta-marks">{{ submission.question.marks }} marks</span>
+                {% if submission.evaluation %}
+                <span class="qmeta-tag" style="background: var(--amber-light); color: #d97706; margin-left: auto;">{{ submission.evaluation.total_score }}/20</span>
+                {% else %}
+                <span class="qmeta-tag" style="background: rgba(239,68,68,0.1); color: var(--red); margin-left: auto;">Not rated yet</span>
+                {% endif %}
+            </div>
+            <p class="q-text-main" style="font-size: 0.95rem;">{{ submission.question.text }}</p>
+        </a>
+        {% else %}
+        <p style="color: var(--text-muted);">No submissions yet — answer a mains question to get started.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
