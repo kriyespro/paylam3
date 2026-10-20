@@ -83,6 +83,28 @@
     .lesson-description { font-size: 0.85rem; color: var(--premium-text-secondary); padding-left: 31px; line-height: 1.4; }
     .lesson-type-icon { color: var(--premium-primary); opacity: 0.7; }
     .lesson-duration { color: var(--premium-text-secondary); font-size: 0.85rem; }
+
+    .lesson-media { padding-left: 31px; margin-top: 4px; }
+    .lesson-media img.lesson-thumb {
+        max-width: 280px; max-height: 180px; border-radius: 10px; border: 1px solid var(--premium-border);
+        cursor: zoom-in; -webkit-user-drag: none; user-select: none;
+    }
+    .lesson-pdf-frame {
+        width: 100%; max-width: 640px; height: 420px; border: 1px solid var(--premium-border);
+        border-radius: 10px; -webkit-user-select: none; user-select: none;
+    }
+    .lesson-zoom-overlay {
+        position: fixed; inset: 0; background: rgba(15,23,42,.9); z-index: 1000;
+        display: flex; align-items: center; justify-content: center; cursor: zoom-out;
+    }
+    .lesson-zoom-overlay img {
+        max-width: 92vw; max-height: 92vh; -webkit-user-drag: none; user-select: none;
+        box-shadow: 0 20px 50px rgba(0,0,0,.4); border-radius: 6px;
+    }
+    .lesson-zoom-close {
+        position: absolute; top: 20px; right: 30px; color: #fff; font-size: 2rem;
+        background: none; border: none; cursor: pointer;
+    }
 </style>
 {% endblock %}
 
@@ -92,7 +114,7 @@
     <p>{{ subject.tagline or 'Structured units, practice questions, and revision-ready notes.' }}</p>
 </header>
 
-<div class="premium-container" x-data="{ openModules: {} }">
+<div class="premium-container" x-data="{ openModules: {}, zoomSrc: null }">
     {% for module in subject.modules.all() %}
     <div class="premium-subject-card">
         <div class="card-header">
@@ -128,11 +150,23 @@
                                 {% for lesson in unit.lessons.all() %}
                                 <li class="lesson-item">
                                     <div class="lesson-header-row">
-                                        <i class="fas {{ 'fa-play-circle' if lesson.type == 'video' else ('fa-pen-to-square' if lesson.type in ['practice','quiz'] else ('fa-file-alt' if lesson.type == 'text' else 'fa-file-pdf')) }} lesson-type-icon"></i>
+                                        <i class="fas {{ 'fa-image' if lesson.type == 'image' else ('fa-pen-to-square' if lesson.type in ['practice','quiz'] else ('fa-file-alt' if lesson.type == 'text' else 'fa-file-pdf')) }} lesson-type-icon"></i>
                                         <span class="lesson-title">{{ lesson.title }}</span>
                                         {% if lesson.duration %}<span class="lesson-duration">({{ lesson.duration }})</span>{% endif %}
                                     </div>
                                     {% if lesson.description %}<div class="lesson-description">{{ lesson.description }}</div>{% endif %}
+                                    {% if lesson.image %}
+                                    <div class="lesson-media">
+                                        <img src="{{ lesson.image.url }}" alt="{{ lesson.title }}" class="lesson-thumb"
+                                             oncontextmenu="return false" draggable="false"
+                                             @click="zoomSrc = '{{ lesson.image.url }}'">
+                                    </div>
+                                    {% endif %}
+                                    {% if lesson.pdf_file %}
+                                    <div class="lesson-media" oncontextmenu="return false">
+                                        <iframe class="lesson-pdf-frame" src="{{ lesson.pdf_file.url }}#toolbar=0&navpanes=0&scrollbar=0"></iframe>
+                                    </div>
+                                    {% endif %}
                                 </li>
                                 {% endfor %}
                             </ul>
@@ -144,6 +178,11 @@
         </div>
     </div>
     {% endfor %}
+
+    <div class="lesson-zoom-overlay" x-show="zoomSrc" @click="zoomSrc = null" oncontextmenu="return false" style="display: none;">
+        <button class="lesson-zoom-close" @click.stop="zoomSrc = null">&times;</button>
+        <img :src="zoomSrc" draggable="false" @click.stop>
+    </div>
 </div>
 
 <!-- Floating Back Button -->

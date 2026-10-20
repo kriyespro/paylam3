@@ -1,3 +1,4 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
 
 THEME_CHOICES = [
@@ -8,7 +9,7 @@ THEME_CHOICES = [
 
 LESSON_TYPE_CHOICES = [
     ('text', 'Text'),
-    ('video', 'Video'),
+    ('image', 'Image'),
     ('practice', 'Practice'),
     ('quiz', 'Quiz'),
     ('pdf', 'PDF'),
@@ -82,6 +83,16 @@ class Lesson(models.Model):
     type = models.CharField(max_length=20, choices=LESSON_TYPE_CHOICES, default='text')
     duration = models.CharField(max_length=30, blank=True)
     description = models.TextField(blank=True)
+    image = models.ImageField(
+        upload_to='lessons/images/', blank=True, null=True,
+        validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])],
+        help_text='JPEG or PNG only.',
+    )
+    pdf_file = models.FileField(
+        upload_to='lessons/pdfs/', blank=True, null=True,
+        validators=[FileExtensionValidator(['pdf'])],
+        help_text='PDF only.',
+    )
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
