@@ -19,7 +19,7 @@
 .step-line.done { background: #10B981; }
 
 .steps-labels { display: flex; justify-content: space-between; margin-bottom: 30px; margin-top: -10px; }
-.step-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); text-align: center; width: 80px; }
+.step-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); text-align: center; flex: 1; min-width: 0; }
 .step-label.active { color: #FCD148; font-weight: 600; }
 
 .panel-title { color: #fff; font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }

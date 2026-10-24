@@ -42,3 +42,11 @@
 .am-link:hover { text-decoration: underline; }
 
 .am-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+
+.g_id_signin { max-width: 100%; overflow: hidden; }
+
+@media (max-width: 480px) {
+    .am-page-wrap { padding-left: 14px; padding-right: 14px; }
+    .am-card { padding: 28px 22px; }
+    .am-row2 { grid-template-columns: 1fr; }
+}
