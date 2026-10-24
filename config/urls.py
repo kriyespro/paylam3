@@ -33,6 +33,7 @@ urlpatterns = [
     path('prelims/', include('apps.prelims.urls')),
     path('bookmarks/', include('apps.engagement.urls')),
     path('mains/', include('apps.mains.urls')),
+    path('ncert/', include('apps.ncert.urls')),
     path('evaluations/', include('apps.evaluations.urls')),
     path('current-affairs/', include('apps.current_affairs.urls')),
     path('blog/', include('apps.blog.urls')),

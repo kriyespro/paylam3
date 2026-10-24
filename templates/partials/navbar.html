@@ -16,6 +16,7 @@
         <ul class="nav-links">
             <li><a href="{{ url('core:home') }}" class="{{ 'active' if request.resolver_match.view_name == 'core:home' }}"><i class="fas fa-home"></i> Home</a></li>
             <li><a href="{{ url('content:list') }}"><i class="fas fa-book-open"></i> Learn</a></li>
+            <li><a href="{{ url('ncert:list') }}"><i class="fas fa-book-reader"></i> NCERT</a></li>
             <li><a href="{{ url('prelims:list') }}"><i class="fas fa-clipboard-check"></i> Prelims</a></li>
             <li><a href="{{ url('mains:list') }}"><i class="fas fa-pen-nib"></i> Mains</a></li>
             <li><a href="{{ url('current_affairs:list') }}"><i class="far fa-newspaper"></i> News</a></li>

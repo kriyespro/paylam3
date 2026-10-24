@@ -22,9 +22,20 @@ from apps.current_affairs.models import Article
 from apps.engagement.models import Attempt, Bookmark
 from apps.evaluations.models import Evaluation, Submission
 from apps.mains.models import MainsQuestion
+from apps.ncert.models import Question as NcertQuestion, Topic as NcertTopic
 from apps.prelims.models import Question
 
-from .forms import ArticleForm, ChoiceFormSet, MainsQuestionForm, PostForm, QuestionForm, SubjectForm
+from .forms import (
+    ArticleForm,
+    ChoiceFormSet,
+    MainsQuestionForm,
+    NcertChoiceFormSet,
+    NcertQuestionForm,
+    NcertTopicForm,
+    PostForm,
+    QuestionForm,
+    SubjectForm,
+)
 from .mixins import StaffRequiredMixin, SuperuserRequiredMixin
 
 User = get_user_model()
@@ -401,6 +412,103 @@ class QuestionDeleteView(AdminDeleteView):
     model = Question
     success_url = reverse_lazy('platform_admin:question_list')
     extra_context = {'active': 'questions', 'title': 'Delete Question', 'cancel_url': reverse_lazy('platform_admin:question_list')}
+
+
+# ---------- NCERT Topics ----------
+
+class NcertTopicListView(AdminListView):
+    model = NcertTopic
+    ordering = ['subject', 'order', 'name']
+    extra_context = {
+        'active': 'ncert_topics',
+        'title': 'NCERT Topics',
+        'columns': [('Subject', 'subject'), ('Topic', 'name'), ('Order', 'order')],
+        'create_url': reverse_lazy('platform_admin:ncert_topic_create'),
+        'edit_url_name': 'platform_admin:ncert_topic_update',
+        'delete_url_name': 'platform_admin:ncert_topic_delete',
+    }
+
+
+class NcertTopicCreateView(AdminCreateView):
+    model = NcertTopic
+    form_class = NcertTopicForm
+    success_url = reverse_lazy('platform_admin:ncert_topic_list')
+    extra_context = {'active': 'ncert_topics', 'title': 'New NCERT Topic', 'cancel_url': reverse_lazy('platform_admin:ncert_topic_list')}
+
+
+class NcertTopicUpdateView(AdminUpdateView):
+    model = NcertTopic
+    form_class = NcertTopicForm
+    success_url = reverse_lazy('platform_admin:ncert_topic_list')
+    extra_context = {'active': 'ncert_topics', 'title': 'Edit NCERT Topic', 'cancel_url': reverse_lazy('platform_admin:ncert_topic_list')}
+
+
+class NcertTopicDeleteView(AdminDeleteView):
+    model = NcertTopic
+    success_url = reverse_lazy('platform_admin:ncert_topic_list')
+    extra_context = {'active': 'ncert_topics', 'title': 'Delete NCERT Topic', 'cancel_url': reverse_lazy('platform_admin:ncert_topic_list')}
+
+
+# ---------- NCERT Questions (with Choices inline formset) ----------
+
+class NcertQuestionListView(AdminListView):
+    model = NcertQuestion
+    ordering = ['-created_at']
+    extra_context = {
+        'active': 'ncert_questions',
+        'title': 'NCERT Questions',
+        'columns': [('Topic', 'topic'), ('Bank', 'get_bank_display'), ('Difficulty', 'difficulty'), ('Year', 'year')],
+        'create_url': reverse_lazy('platform_admin:ncert_question_create'),
+        'edit_url_name': 'platform_admin:ncert_question_update',
+        'delete_url_name': 'platform_admin:ncert_question_delete',
+    }
+
+
+def _ncert_question_form_view(request, pk=None):
+    instance = get_object_or_404(NcertQuestion, pk=pk) if pk else None
+    if request.method == 'POST':
+        form = NcertQuestionForm(request.POST, instance=instance)
+        formset = NcertChoiceFormSet(request.POST, instance=instance or NcertQuestion())
+        if form.is_valid():
+            question = form.save()
+            formset = NcertChoiceFormSet(request.POST, instance=question)
+            if formset.is_valid():
+                formset.save()
+                messages.success(request, 'Question saved.')
+                return redirect('platform_admin:ncert_question_list')
+    else:
+        form = NcertQuestionForm(instance=instance)
+        formset = NcertChoiceFormSet(instance=instance)
+
+    return render(request, 'pages/platform_admin/question_form.html', {
+        'active': 'ncert_questions',
+        'title': 'Edit NCERT Question' if instance else 'New NCERT Question',
+        'form': form,
+        'formset': formset,
+        'cancel_url': reverse_lazy('platform_admin:ncert_question_list'),
+    })
+
+
+class NcertQuestionCreateView(StaffRequiredMixin, TemplateView):
+    def get(self, request):
+        return _ncert_question_form_view(request)
+
+    def post(self, request):
+        return _ncert_question_form_view(request)
+
+
+class NcertQuestionUpdateView(StaffRequiredMixin, TemplateView):
+    def get(self, request, pk):
+        return _ncert_question_form_view(request, pk)
+
+    def post(self, request, pk):
+        return _ncert_question_form_view(request, pk)
+
+
+class NcertQuestionDeleteView(AdminDeleteView):
+    model = NcertQuestion
+    success_url = reverse_lazy('platform_admin:ncert_question_list')
+    extra_context = {'active': 'ncert_questions', 'title': 'Delete NCERT Question', 'cancel_url': reverse_lazy('platform_admin:ncert_question_list')}
 
 
 # ---------- Mains Questions ----------

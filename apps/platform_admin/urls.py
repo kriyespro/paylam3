@@ -29,6 +29,16 @@ urlpatterns = [
     path('questions/<int:pk>/edit/', views.QuestionUpdateView.as_view(), name='question_update'),
     path('questions/<int:pk>/delete/', views.QuestionDeleteView.as_view(), name='question_delete'),
 
+    path('ncert-topics/', views.NcertTopicListView.as_view(), name='ncert_topic_list'),
+    path('ncert-topics/new/', views.NcertTopicCreateView.as_view(), name='ncert_topic_create'),
+    path('ncert-topics/<int:pk>/edit/', views.NcertTopicUpdateView.as_view(), name='ncert_topic_update'),
+    path('ncert-topics/<int:pk>/delete/', views.NcertTopicDeleteView.as_view(), name='ncert_topic_delete'),
+
+    path('ncert-questions/', views.NcertQuestionListView.as_view(), name='ncert_question_list'),
+    path('ncert-questions/new/', views.NcertQuestionCreateView.as_view(), name='ncert_question_create'),
+    path('ncert-questions/<int:pk>/edit/', views.NcertQuestionUpdateView.as_view(), name='ncert_question_update'),
+    path('ncert-questions/<int:pk>/delete/', views.NcertQuestionDeleteView.as_view(), name='ncert_question_delete'),
+
     path('mains-questions/', views.MainsQuestionListView.as_view(), name='mains_question_list'),
     path('mains-questions/new/', views.MainsQuestionCreateView.as_view(), name='mains_question_create'),
     path('mains-questions/<int:pk>/edit/', views.MainsQuestionUpdateView.as_view(), name='mains_question_update'),

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}NCERT Practice | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/mcq-theme.css') }}">
+{% endblock %}
+{% block content %}
+<div class="ev-container" style="padding-top: 100px; max-width: 800px;">
+    <div class="ev-header">
+        <div class="ev-title">NCERT <span>Practice</span></div>
+    </div>
+
+    <form style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;"
+          hx-get="{{ url('ncert:list') }}" hx-target="#question-results" hx-swap="outerHTML" hx-push-url="true">
+        <select name="subject" style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--border-color); font-family: 'Inter', sans-serif;"
+                hx-get="{{ url('ncert:topic_options') }}" hx-target="#topic-select" hx-swap="outerHTML" hx-trigger="change">
+            <option value="">All Subjects</option>
+            {% for s in subjects %}
+            <option value="{{ s.slug }}" {% if selected_subject == s.slug %}selected{% endif %}>{{ s.name }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="topic" id="topic-select" style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--border-color); font-family: 'Inter', sans-serif;">
+            <option value="">All Topics</option>
+            {% for t in topics %}
+            <option value="{{ t.pk }}" {% if selected_topic == t.pk|string %}selected{% endif %}>{{ t.name }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="bank" style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--border-color); font-family: 'Inter', sans-serif;">
+            <option value="">All Banks</option>
+            <option value="mcq" {% if selected_bank == 'mcq' %}selected{% endif %}>Practice MCQ</option>
+            <option value="pyq" {% if selected_bank == 'pyq' %}selected{% endif %}>PYQ</option>
+        </select>
+
+        <button type="submit" class="btn btn-submit-main" style="padding: 8px 20px; font-size: 0.9rem;">Filter</button>
+    </form>
+
+    {% include "partials/ncert/question_results.html" %}
+</div>
+
+<a href="javascript:history.back()" class="floating-back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+{% endblock %}

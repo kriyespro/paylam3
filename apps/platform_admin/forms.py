@@ -6,6 +6,7 @@ from apps.blog.models import Post
 from apps.content.models import Subject
 from apps.current_affairs.models import Article
 from apps.mains.models import MainsQuestion
+from apps.ncert.models import Choice as NcertChoice, Question as NcertQuestion, Topic as NcertTopic
 from apps.prelims.models import Choice, Question
 
 ADMIN_INPUT_ATTRS = {'class': 'pa-input'}
@@ -69,6 +70,43 @@ class QuestionForm(forms.ModelForm):
 
 ChoiceFormSet = forms.inlineformset_factory(
     Question, Choice,
+    fields=['text', 'is_correct', 'order'],
+    extra=1, can_delete=True, min_num=2, validate_min=True,
+    widgets={
+        'text': forms.TextInput(attrs=ADMIN_INPUT_ATTRS),
+        'order': forms.NumberInput(attrs={**ADMIN_INPUT_ATTRS, 'style': 'width:70px;'}),
+    },
+)
+
+
+class NcertTopicForm(forms.ModelForm):
+    class Meta:
+        model = NcertTopic
+        fields = ['subject', 'name', 'order']
+        widgets = {
+            'subject': forms.Select(attrs=ADMIN_INPUT_ATTRS),
+            'name': forms.TextInput(attrs=ADMIN_INPUT_ATTRS),
+            'order': forms.NumberInput(attrs=ADMIN_INPUT_ATTRS),
+        }
+
+
+class NcertQuestionForm(forms.ModelForm):
+    class Meta:
+        model = NcertQuestion
+        fields = ['topic', 'bank', 'year', 'difficulty', 'est_time', 'text', 'explanation']
+        widgets = {
+            'topic': forms.Select(attrs=ADMIN_INPUT_ATTRS),
+            'bank': forms.Select(attrs=ADMIN_INPUT_ATTRS),
+            'year': forms.TextInput(attrs=ADMIN_INPUT_ATTRS),
+            'difficulty': forms.Select(attrs=ADMIN_INPUT_ATTRS),
+            'est_time': forms.TextInput(attrs=ADMIN_INPUT_ATTRS),
+            'text': forms.Textarea(attrs=ADMIN_TEXTAREA_ATTRS),
+            'explanation': forms.Textarea(attrs=ADMIN_TEXTAREA_ATTRS),
+        }
+
+
+NcertChoiceFormSet = forms.inlineformset_factory(
+    NcertQuestion, NcertChoice,
     fields=['text', 'is_correct', 'order'],
     extra=1, can_delete=True, min_num=2, validate_min=True,
     widgets={

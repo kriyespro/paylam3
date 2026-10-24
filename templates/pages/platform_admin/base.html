@@ -34,6 +34,8 @@
                 <div class="pa-nav-section">Questions</div>
                 <a href="{{ url('platform_admin:question_list') }}" class="{{ 'active' if active == 'questions' }}"><i class="fas fa-check-square"></i> Prelims Questions</a>
                 <a href="{{ url('platform_admin:mains_question_list') }}" class="{{ 'active' if active == 'mains_questions' }}"><i class="fas fa-pen-nib"></i> Mains Questions</a>
+                <a href="{{ url('platform_admin:ncert_topic_list') }}" class="{{ 'active' if active == 'ncert_topics' }}"><i class="fas fa-layer-group"></i> NCERT Topics</a>
+                <a href="{{ url('platform_admin:ncert_question_list') }}" class="{{ 'active' if active == 'ncert_questions' }}"><i class="fas fa-book-reader"></i> NCERT Questions</a>
 
                 <div class="pa-nav-section">People</div>
                 <a href="{{ url('platform_admin:user_list') }}" class="{{ 'active' if active == 'users' }}"><i class="fas fa-users"></i> Users</a>
