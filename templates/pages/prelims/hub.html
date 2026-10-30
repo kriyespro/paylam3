@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Prelims Module | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/evaluation-theme.css') }}">
+<link rel="stylesheet" href="{{ static('css/prelims-hub-theme.css') }}">
+{% endblock %}
+{% block content %}
+<div style="padding-top: 100px; padding-left: 20px; padding-right: 20px;" x-data="{ topicsOpen: false }">
+
+    <div class="ph-header">
+        <div class="ph-title"><i class="fas fa-layer-group"></i> Prelims Module</div>
+        <div class="ph-header-right">
+            <div class="ph-search"><i class="fas fa-search"></i><input type="text" placeholder="Search MCQs, PYQs, Topics..."></div>
+            {% if request.user.is_authenticated %}
+            <div class="ph-streak"><i class="fas fa-fire"></i> {{ request.user.profile.streak }} Days</div>
+            <div class="ph-xp">{{ request.user.profile.xp }} XP</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="ph-shell">
+        <h2 class="ph-section-title"><i class="fas fa-bolt" style="color: var(--amber);"></i> Quick Access</h2>
+        <div class="ph-grid">
+            <a href="{{ url('prelims:list') }}?type=pyq" class="ph-module-card">
+                <div class="ph-module-icon ph-icon-blue"><i class="fas fa-history"></i></div>
+                <div class="ph-module-title">PYQ Module</div>
+                <div class="ph-module-stats">
+                    {% if request.user.is_authenticated and pyq_stats.completed %}
+                    <span>{{ pyq_stats.completed }} Completed</span>
+                    <span style="color: var(--green);"><i class="fas fa-arrow-up"></i> +{{ pyq_stats.today }} today</span>
+                    {% else %}
+                    <span>Previous Year Questions</span>
+                    {% endif %}
+                </div>
+                <div class="ph-progress-track"><div class="ph-progress-fill" style="width: {{ [(pyq_stats.completed or 0) * 2, 100]|min if pyq_stats else 0 }}%; background: var(--blue);"></div></div>
+                <div class="ph-module-footer" style="color: var(--blue);">Continue Learning <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="{{ url('prelims:list') }}?type=mcq" class="ph-module-card">
+                <div class="ph-module-icon ph-icon-green"><i class="fas fa-list-check"></i></div>
+                <div class="ph-module-title">MCQ Practice</div>
+                <div class="ph-module-stats">
+                    {% if request.user.is_authenticated and mcq_stats.completed %}
+                    <span>{{ mcq_stats.completed }} Attempted</span>
+                    <span style="color: var(--green);"><i class="fas fa-arrow-up"></i> +{{ mcq_stats.today }} today</span>
+                    {% else %}
+                    <span>Practice MCQs</span>
+                    {% endif %}
+                </div>
+                <div class="ph-progress-track"><div class="ph-progress-fill" style="width: {{ [(mcq_stats.completed or 0) * 2, 100]|min if mcq_stats else 0 }}%; background: var(--green);"></div></div>
+                <div class="ph-module-footer" style="color: var(--green);">Open Module <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="{{ url('current_affairs:list') }}" class="ph-module-card">
+                <div class="ph-module-icon ph-icon-purple"><i class="far fa-newspaper"></i></div>
+                <div class="ph-module-title">News</div>
+                <div class="ph-module-stats"><span>Current Affairs</span></div>
+                <div class="ph-progress-track"><div class="ph-progress-fill" style="width: 70%; background: var(--purple);"></div></div>
+                <div class="ph-module-footer" style="color: var(--purple);">Read Now <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="{{ url('ncert:list') }}" class="ph-module-card">
+                <div class="ph-module-icon ph-icon-amber"><i class="fas fa-book-open"></i></div>
+                <div class="ph-module-title">NCERT Base</div>
+                <div class="ph-module-stats"><span>Foundational Topics</span></div>
+                <div class="ph-progress-track"><div class="ph-progress-fill" style="width: 40%; background: var(--amber);"></div></div>
+                <div class="ph-module-footer" style="color: var(--amber);">Resume <i class="fas fa-arrow-right"></i></div>
+            </a>
+        </div>
+
+        <div class="ph-two-col">
+            <div class="ph-daily-card">
+                <div class="ph-daily-top">
+                    <div>
+                        <h2 class="ph-section-title" style="margin-bottom: 5px;"><i class="fas fa-star" style="color: var(--amber);"></i> Daily Prelims Challenge</h2>
+                        {% if daily %}<p class="ph-daily-meta">{{ daily_attempts }} student{{ 's' if daily_attempts != 1 else '' }} attempted so far</p>{% endif %}
+                    </div>
+                </div>
+
+                {% if daily %}
+                <div class="ph-rewards">
+                    <span class="ph-reward-pill" style="color: var(--purple);"><i class="fas fa-level-up-alt"></i> +{{ daily.xp }} XP</span>
+                    <span class="ph-reward-pill" style="color: var(--amber);"><i class="fas fa-coins"></i> +{{ daily.coins }} Coins</span>
+                    {% if daily.question.difficulty %}<span class="ph-reward-pill" style="color: var(--red);"><i class="fas fa-fire"></i> {{ daily.question.difficulty }}</span>{% endif %}
+                </div>
+                <div class="ph-daily-text">{{ daily.question.text|striptags }}</div>
+                <a href="{{ url('prelims:daily') }}" class="ph-btn ph-btn-primary"><i class="fas fa-play"></i> Attempt Now</a>
+                {% else %}
+                <p style="color: var(--text-muted);">No question available yet.</p>
+                {% endif %}
+            </div>
+
+            <div class="ph-revision-card">
+                <h2 class="ph-section-title" style="margin-bottom: 10px;">Revision Areas</h2>
+                {% if request.user.is_authenticated %}
+                <p class="ph-revision-sub">Based on your past MCQ attempts</p>
+                {% set rtotal = (revision_strong + revision_average + revision_weak + revision_low_practice) or 1 %}
+                <div class="ph-revision-bar">
+                    <span style="width: {{ revision_strong / rtotal * 100 }}%; background: var(--green);"></span>
+                    <span style="width: {{ revision_average / rtotal * 100 }}%; background: var(--amber);"></span>
+                    <span style="width: {{ revision_weak / rtotal * 100 }}%; background: var(--red);"></span>
+                    <span style="width: {{ revision_low_practice / rtotal * 100 }}%; background: var(--border-color);"></span>
+                </div>
+                <div class="ph-revision-legend">
+                    <div class="ph-revision-legend-item">Strong<div class="ph-revision-legend-count"><span style="color: var(--green);">&#9632;</span> {{ revision_strong }}</div></div>
+                    <div class="ph-revision-legend-item">Average<div class="ph-revision-legend-count"><span style="color: var(--amber);">&#9632;</span> {{ revision_average }}</div></div>
+                    <div class="ph-revision-legend-item">Weak<div class="ph-revision-legend-count"><span style="color: var(--red);">&#9632;</span> {{ revision_weak }}</div></div>
+                    <div class="ph-revision-legend-item">Low Practice<div class="ph-revision-legend-count"><span style="color: var(--text-muted);">&#9632;</span> {{ revision_low_practice }}</div></div>
+                </div>
+                {% else %}
+                <p class="ph-revision-sub">Log in to see your personal revision breakdown by topic.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="ph-topics-card">
+            <h2 class="ph-section-title" style="justify-content: center;">Important Topics</h2>
+            <div class="ph-topic-banner">Most repeated topics in last 5-year PYQs</div>
+            <div class="ph-topics-row">
+                <a href="{{ url('prelims:list') }}?subject=History" class="ph-topic-chip">Ancient History</a>
+                <a href="{{ url('prelims:list') }}?subject=Environment" class="ph-topic-chip">Climate Change</a>
+                <a href="{{ url('prelims:list') }}?subject=Polity" class="ph-topic-chip">Polity</a>
+                <a href="{{ url('prelims:list') }}?subject=Geography" class="ph-topic-chip">Geography</a>
+                <a href="{{ url('prelims:list') }}?subject=Economy" class="ph-topic-chip">Economy</a>
+                <span class="ph-topic-chip ph-topic-chip-all" @click="topicsOpen = true">&hellip; View All</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="ph-modal-overlay" x-show="topicsOpen" @click.self="topicsOpen = false" style="display: none;">
+        <div class="ph-modal">
+            <button class="ph-modal-close" @click="topicsOpen = false">&times;</button>
+            <h3 style="margin-bottom: 26px; color: var(--secondary); font-size: 1.5rem; text-align: center;"><i class="fas fa-list-ul"></i> All Important Topics</h3>
+            <div class="ph-topic-categories">
+                <div class="ph-topic-category">
+                    <h4><i class="fas fa-microscope"></i> Science & Technology</h4>
+                    <ul><li><i class="fas fa-angle-right"></i> Biotechnology</li><li><i class="fas fa-angle-right"></i> Life Sciences</li><li><i class="fas fa-angle-right"></i> Emerging Technologies</li><li><i class="fas fa-angle-right"></i> Defence Technology</li></ul>
+                </div>
+                <div class="ph-topic-category">
+                    <h4><i class="fas fa-landmark"></i> Ancient &amp; Medieval History</h4>
+                    <ul><li><i class="fas fa-angle-right"></i> Mauryan Empire</li><li><i class="fas fa-angle-right"></i> Gupta Empire</li><li><i class="fas fa-angle-right"></i> Indus Valley Civilisation</li><li><i class="fas fa-angle-right"></i> Rajputs</li></ul>
+                </div>
+                <div class="ph-topic-category">
+                    <h4><i class="fas fa-flag"></i> Modern History</h4>
+                    <ul><li><i class="fas fa-angle-right"></i> Non-Cooperation and Khilafat Movement</li><li><i class="fas fa-angle-right"></i> Socio-Religious Reform Movements</li><li><i class="fas fa-angle-right"></i> Towards Freedom and Partition</li></ul>
+                </div>
+                <div class="ph-topic-category">
+                    <h4><i class="fas fa-gavel"></i> Indian Polity</h4>
+                    <ul><li><i class="fas fa-angle-right"></i> Parliament</li><li><i class="fas fa-angle-right"></i> Fundamental Rights</li><li><i class="fas fa-angle-right"></i> Centre-State Relations</li></ul>
+                </div>
+                <div class="ph-topic-category">
+                    <h4><i class="fas fa-chart-line"></i> Economy</h4>
+                    <ul><li><i class="fas fa-angle-right"></i> Money, Banking and Monetary Policy</li><li><i class="fas fa-angle-right"></i> Public Finance in India</li><li><i class="fas fa-angle-right"></i> Trade and External Sector</li></ul>
+                </div>
+                <div class="ph-topic-category">
+                    <h4><i class="fas fa-leaf"></i> Environment &amp; Ecology</h4>
+                    <ul><li><i class="fas fa-angle-right"></i> Environmental Pollution</li><li><i class="fas fa-angle-right"></i> Climate Change Mitigation</li><li><i class="fas fa-angle-right"></i> Indian Biodiversity</li></ul>
+                </div>
+                <div class="ph-topic-category">
+                    <h4><i class="fas fa-map"></i> Geography</h4>
+                    <ul><li><i class="fas fa-angle-right"></i> Drainage System</li><li><i class="fas fa-angle-right"></i> Major Physical Divisions of India</li><li><i class="fas fa-angle-right"></i> Mineral Resources</li></ul>
+                </div>
+                <div class="ph-topic-category">
+                    <h4><i class="fas fa-globe"></i> International Relations</h4>
+                    <ul><li><i class="fas fa-angle-right"></i> Regional Groupings</li><li><i class="fas fa-angle-right"></i> India and its Neighbourhood</li><li><i class="fas fa-angle-right"></i> The United Nations</li></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a href="javascript:history.back()" class="floating-back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+{% endblock %}

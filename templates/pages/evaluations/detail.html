@@ -26,9 +26,9 @@
     </div>
 
     {% if submission.evaluation %}
-    <div class="total-score-box">
-        <span class="ts-label">Your Self-Evaluation Score</span>
-        <span class="ts-value">{{ submission.evaluation.total_score }}/20</span>
+    <div class="score-circle-wrap">
+        <div class="score-circle {% if submission.evaluation.total_score < 8 %}band-red{% elif submission.evaluation.total_score < 14 %}band-amber{% endif %}">{{ submission.evaluation.total_score }}/20</div>
+        <div class="score-circle-label">Your Self-Evaluation Score</div>
     </div>
     <div class="write-card">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-main);">

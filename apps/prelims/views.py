@@ -4,10 +4,61 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
 
-from apps.engagement.models import Bookmark
+from apps.engagement.models import Attempt, Bookmark, TopicStat
 from apps.engagement.services import record_attempt
 
 from .models import DailyQuestion, Question
+
+
+def _todays_daily():
+    today = date.today()
+    daily = DailyQuestion.objects.filter(date=today).select_related('question').first()
+    if not daily:
+        question = Question.objects.order_by('?').first()
+        if question:
+            daily = DailyQuestion.objects.create(date=today, question=question)
+    return daily
+
+
+def hub(request):
+    daily = _todays_daily()
+    context = {
+        'daily': daily,
+        'daily_attempts': Attempt.objects.filter(question=daily.question).count() if daily else 0,
+    }
+
+    if request.user.is_authenticated:
+        attempts = Attempt.objects.filter(user=request.user)
+        today = date.today()
+
+        def module_stats(q_type):
+            qs = attempts.filter(question__type=q_type)
+            return {'completed': qs.count(), 'today': qs.filter(created_at__date=today).count()}
+
+        topic_stats = TopicStat.objects.filter(user=request.user)
+        strong = average = weak = low_practice = 0
+        for stat in topic_stats:
+            if stat.total < 3:
+                low_practice += 1
+            else:
+                accuracy = stat.correct / stat.total
+                if accuracy >= 0.75:
+                    strong += 1
+                elif accuracy < 0.4:
+                    weak += 1
+                else:
+                    average += 1
+
+        context.update({
+            'pyq_stats': module_stats('pyq'),
+            'mcq_stats': module_stats('mcq'),
+            'revision_strong': strong,
+            'revision_average': average,
+            'revision_weak': weak,
+            'revision_low_practice': low_practice,
+        })
+
+    return render(request, 'pages/prelims/hub.html', context)
 
 
 def question_list(request):
@@ -102,12 +153,4 @@ def submit_answer(request, pk):
 
 
 def daily_question(request):
-    today = date.today()
-    daily = DailyQuestion.objects.filter(date=today).select_related('question').first()
-
-    if not daily:
-        question = Question.objects.order_by('?').first()
-        if question:
-            daily = DailyQuestion.objects.create(date=today, question=question)
-
-    return render(request, 'pages/prelims/daily.html', {'daily': daily})
+    return render(request, 'pages/prelims/daily.html', {'daily': _todays_daily()})

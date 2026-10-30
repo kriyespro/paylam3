@@ -1,9 +1,34 @@
 from datetime import date
 
 from django.core.paginator import Paginator
+from django.db.models import Max, Min
 from django.shortcuts import get_object_or_404, render
 
+from apps.evaluations.models import Submission
+
 from .models import DailyMainsQuestion, MainsQuestion
+
+
+def _todays_daily():
+    today = date.today()
+    daily = DailyMainsQuestion.objects.filter(date=today).select_related('question').first()
+    if not daily:
+        question = MainsQuestion.objects.order_by('?').first()
+        if question:
+            daily = DailyMainsQuestion.objects.create(date=today, question=question)
+    return daily
+
+
+def hub(request):
+    daily = _todays_daily()
+    year_range = MainsQuestion.objects.aggregate(min_year=Min('year'), max_year=Max('year'))
+    context = {
+        'daily': daily,
+        'daily_attempts': Submission.objects.filter(question=daily.question).count() if daily else 0,
+        'min_year': year_range['min_year'],
+        'max_year': year_range['max_year'],
+    }
+    return render(request, 'pages/mains/hub.html', context)
 
 
 def question_list(request):
@@ -44,12 +69,4 @@ def question_practice(request, pk):
 
 
 def daily_question(request):
-    today = date.today()
-    daily = DailyMainsQuestion.objects.filter(date=today).select_related('question').first()
-
-    if not daily:
-        question = MainsQuestion.objects.order_by('?').first()
-        if question:
-            daily = DailyMainsQuestion.objects.create(date=today, question=question)
-
-    return render(request, 'pages/mains/daily.html', {'daily': daily})
+    return render(request, 'pages/mains/daily.html', {'daily': _todays_daily()})

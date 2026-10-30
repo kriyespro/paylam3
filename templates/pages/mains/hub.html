@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Mains | THE BASICS{% endblock %}
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ static('css/legacy.css') }}">
+<link rel="stylesheet" href="{{ static('css/evaluation-theme.css') }}">
+{% endblock %}
+{% block content %}
+<div class="mains-container">
+
+    <a href="{{ url('mains:list') }}" class="eval-hero-card">
+        <div class="hero-image-placeholder">
+            <div class="line"></div>
+            <div class="line red"></div>
+            <div class="line"></div>
+            <div class="line green"></div>
+            <div class="line"></div>
+        </div>
+        <h1>Instant Answer<br>Evaluation</h1>
+        <span class="btn-evaluate">Evaluate Answer</span>
+    </a>
+
+    <div class="mains-menu-list">
+        <a href="{{ url('mains:daily') }}" class="mains-menu-item">
+            <div class="mains-menu-icon bg-blue"><i class="fas fa-file-signature"></i></div>
+            <div class="mains-menu-content">
+                <h3>Daily Mains Question</h3>
+                <div class="sub-text">{% if daily %}{{ daily_attempts }} attempted{% else %}New question every day{% endif %}</div>
+            </div>
+            <div class="mains-menu-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+
+        <a href="{{ url('evaluations:list') }}" class="mains-menu-item">
+            <div class="mains-menu-icon bg-teal"><i class="fas fa-history"></i></div>
+            <div class="mains-menu-content">
+                <h3>My Evaluations</h3>
+                <div class="sub-text">See previous evaluations</div>
+            </div>
+            <div class="mains-menu-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+
+        <a href="{{ url('mains:list') }}" class="mains-menu-item">
+            <div class="mains-menu-icon bg-orange"><i class="fas fa-book"></i></div>
+            <div class="mains-menu-content">
+                <h3>Mains PYQs</h3>
+                <div class="sub-text">{% if min_year and max_year %}{{ min_year }} - {{ max_year }}{% else %}Browse by paper, subject, year{% endif %}</div>
+            </div>
+            <div class="mains-menu-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+    </div>
+
+</div>
+
+<a href="javascript:history.back()" class="floating-back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+{% endblock %}

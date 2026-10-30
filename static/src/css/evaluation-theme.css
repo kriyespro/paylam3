@@ -22,6 +22,10 @@ body { font-family: 'Outfit', sans-serif; padding-bottom: 80px; }
 .ev-title { font-size:1.25rem; font-weight:800; color:var(--text-main); flex:1; }
 .ev-title span { color: var(--amber); }
 
+/* Ported from daily-mains.html's own <style> block */
+.trophy-btn { width: 40px; height: 40px; border-radius: 10px; background: var(--amber-light); color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; text-decoration: none; border: 1px solid rgba(245,158,11,0.3); transition: transform 0.2s; flex-shrink: 0; }
+.trophy-btn:hover { transform: scale(1.05); }
+
 .question-box { background: var(--card-bg); border-radius: 16px; padding: 22px; border: 1px solid var(--border-color); box-shadow: var(--card-shadow); margin-bottom: 20px; }
 .question-box .qb-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
 .qmeta-tag { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; font-family: 'Inter', sans-serif; }
@@ -29,6 +33,15 @@ body { font-family: 'Outfit', sans-serif; padding-bottom: 80px; }
 .qmeta-subject { background: rgba(139,92,246,0.1); color: #7c3aed; }
 .qmeta-marks { background: rgba(16,185,129,0.1); color: #059669; }
 .question-box .q-text-main { font-size: 1.1rem; font-weight: 600; color: var(--text-main); line-height: 1.7; font-family: 'Inter', sans-serif; }
+
+/* Ported from my-evaluations.html's own <style> block */
+.eval-card { background: var(--card-bg); border-radius: 12px; padding: 20px 22px; box-shadow: var(--card-shadow); margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; border-left: 4px solid var(--green); text-decoration: none; }
+.eval-card .ec-info { min-width: 0; }
+.eval-card .ec-paper { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+.eval-card .ec-text { font-size: 0.95rem; font-weight: 600; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eval-card .ec-score { font-size: 1.4rem; font-weight: 800; color: var(--amber); font-family: 'Inter', sans-serif; flex-shrink: 0; }
+.eval-card.unrated { border-left-color: var(--red); }
+.eval-card.unrated .ec-score { font-size: 0.85rem; font-weight: 700; color: var(--red); }
 
 .write-card { background: var(--card-bg); border-radius: 16px; padding: 22px; border: 1px solid var(--border-color); box-shadow: var(--card-shadow); margin-bottom: 18px; }
 .write-card-title { font-size: 1rem; font-weight: 700; margin-bottom: 14px; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
@@ -75,6 +88,13 @@ body { font-family: 'Outfit', sans-serif; padding-bottom: 80px; }
 .ts-label { font-weight: 700; color: var(--text-main); font-size: 1rem; }
 .ts-value { font-size: 2rem; font-weight: 800; color: var(--amber); font-family: 'Inter', sans-serif; }
 
+/* Ported from sample-evaluation.html's own <style> block */
+.score-circle-wrap { text-align: center; margin-bottom: 18px; }
+.score-circle { width: 100px; height: 100px; border-radius: 50%; border: 8px solid var(--green); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin: 0 auto 10px; font-family: 'Inter', sans-serif; }
+.score-circle.band-amber { border-color: var(--amber); }
+.score-circle.band-red { border-color: var(--red); }
+.score-circle-label { font-weight: 700; color: var(--text-main); font-size: 0.95rem; }
+
 .notes-area { width: 100%; padding: 14px; border: 1.5px solid var(--border-color); border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 0.95rem; resize: vertical; min-height: 90px; outline: none; margin-bottom: 16px; transition: border 0.2s; }
 .notes-area:focus { border-color: var(--amber); }
 
@@ -117,3 +137,48 @@ body { font-family: 'Outfit', sans-serif; padding-bottom: 80px; }
 @media (max-width: 600px) {
     .submit-bar { flex-direction: column; }
 }
+
+/* Ported from mains.html's own <style> block — its hero evaluate-CTA +
+   menu-list already used this app's own shared tokens (var(--primary)/
+   var(--secondary)/var(--card-bg)/var(--border-color)), so no palette
+   translation needed, straight port. */
+.mains-container { max-width: 800px; margin: 0 auto; padding: 20px; padding-top: 100px; }
+
+.eval-hero-card {
+    background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 20px;
+    padding: 40px 20px; text-align: center; color: var(--white); box-shadow: var(--card-shadow);
+    margin-bottom: 30px; position: relative; overflow: hidden; text-decoration: none; display: block;
+}
+.hero-image-placeholder {
+    width: 150px; height: 180px; background: rgba(255,255,255,0.9); border-radius: 10px;
+    margin: 0 auto 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transform: rotate(-5deg); box-shadow: 0 10px 25px rgba(0,0,0,0.2); color: var(--primary); position: relative;
+}
+.hero-image-placeholder::after {
+    content: '\f303'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 2.4rem; color: var(--accent);
+    position: absolute; bottom: -15px; right: -15px; background: var(--primary); width: 46px; height: 46px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; transform: rotate(5deg);
+}
+.hero-image-placeholder .line { width: 70%; height: 6px; background: #E2E8F0; margin: 5px 0; border-radius: 3px; }
+.hero-image-placeholder .line.red { background: #FCA5A5; width: 60%; }
+.hero-image-placeholder .line.green { background: #6EE7B7; width: 80%; }
+.eval-hero-card h1 { font-size: 2rem; font-weight: 800; margin-bottom: 25px; line-height: 1.2; color: var(--white); }
+.btn-evaluate {
+    background: var(--blue); color: white; border: none; padding: 16px 30px; border-radius: 12px;
+    font-size: 1.1rem; font-weight: 700; width: 100%; max-width: 400px; margin: 0 auto; display: block;
+    text-decoration: none; text-align: center; box-shadow: 0 4px 15px rgba(59,130,246,0.4); transition: all 0.25s;
+}
+.btn-evaluate:hover { background: #2563EB; transform: translateY(-2px); }
+
+.mains-menu-list { background: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--card-shadow); }
+.mains-menu-item { display: flex; align-items: center; padding: 20px; border-bottom: 1px solid var(--border-color); text-decoration: none; color: var(--text-main); transition: background 0.2s; }
+.mains-menu-item:last-child { border-bottom: none; }
+.mains-menu-item:hover { background: rgba(0,15,54,0.02); }
+.mains-menu-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: white; margin-right: 15px; flex-shrink: 0; }
+.mains-menu-icon.bg-blue { background: var(--blue); }
+.mains-menu-icon.bg-teal { background: #14B8A6; }
+.mains-menu-icon.bg-orange { background: var(--amber); }
+.mains-menu-content { flex: 1; min-width: 0; }
+.mains-menu-content h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; color: var(--text-main); }
+.mains-menu-content .sub-text { font-size: 0.85rem; color: var(--text-muted); font-family: 'Inter', sans-serif; }
+.mains-menu-arrow { color: var(--text-muted); font-size: 1.2rem; }

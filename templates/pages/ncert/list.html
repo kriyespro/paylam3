@@ -3,41 +3,58 @@
 {% block stylesheets %}
 <link rel="stylesheet" href="{{ static('css/legacy.css') }}">
 <link rel="stylesheet" href="{{ static('css/evaluation-theme.css') }}">
-<link rel="stylesheet" href="{{ static('css/mcq-theme.css') }}">
+<link rel="stylesheet" href="{{ static('css/ncert-theme.css') }}">
 {% endblock %}
 {% block content %}
-<div class="ev-container" style="padding-top: 100px; max-width: 800px;">
-    <div class="ev-header">
-        <div class="ev-title">NCERT <span>Practice</span></div>
+<div style="padding-top: 100px; padding-left: 20px; padding-right: 20px;">
+    <div class="ncert-app-header">
+        <div class="ncert-app-title"><i class="fas fa-book-open"></i> NCERT Base Module</div>
     </div>
 
-    <form style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;"
-          hx-get="{{ url('ncert:list') }}" hx-target="#question-results" hx-swap="outerHTML" hx-push-url="true">
-        <select name="subject" style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--border-color); font-family: 'Inter', sans-serif;"
-                hx-get="{{ url('ncert:topic_options') }}" hx-target="#topic-select" hx-swap="outerHTML" hx-trigger="change">
-            <option value="">All Subjects</option>
-            {% for s in subjects %}
-            <option value="{{ s.slug }}" {% if selected_subject == s.slug %}selected{% endif %}>{{ s.name }}</option>
-            {% endfor %}
-        </select>
+    <div class="ncert-shell">
+        <aside class="ncert-sidebar">
+            <form class="ncert-filter-card"
+                  hx-get="{{ url('ncert:list') }}" hx-target="#question-results" hx-swap="outerHTML" hx-push-url="true">
+                <div class="ncert-filter-title"><i class="fas fa-filter"></i> Filters</div>
 
-        <select name="topic" id="topic-select" style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--border-color); font-family: 'Inter', sans-serif;">
-            <option value="">All Topics</option>
-            {% for t in topics %}
-            <option value="{{ t.pk }}" {% if selected_topic == t.pk|string %}selected{% endif %}>{{ t.name }}</option>
-            {% endfor %}
-        </select>
+                <div class="ncert-filter-group">
+                    <label class="ncert-filter-label">Subject</label>
+                    <select name="subject" class="ncert-filter-select"
+                            hx-get="{{ url('ncert:topic_options') }}" hx-target="#topic-select" hx-swap="outerHTML" hx-trigger="change">
+                        <option value="">All Subjects</option>
+                        {% for s in subjects %}
+                        <option value="{{ s.slug }}" {% if selected_subject == s.slug %}selected{% endif %}>{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        <select name="bank" style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--border-color); font-family: 'Inter', sans-serif;">
-            <option value="">All Banks</option>
-            <option value="mcq" {% if selected_bank == 'mcq' %}selected{% endif %}>Practice MCQ</option>
-            <option value="pyq" {% if selected_bank == 'pyq' %}selected{% endif %}>PYQ</option>
-        </select>
+                <div class="ncert-filter-group">
+                    <label class="ncert-filter-label">Topic</label>
+                    <select name="topic" id="topic-select" class="ncert-filter-select">
+                        <option value="">All Topics</option>
+                        {% for t in topics %}
+                        <option value="{{ t.pk }}" {% if selected_topic == t.pk|string %}selected{% endif %}>{{ t.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        <button type="submit" class="btn btn-submit-main" style="padding: 8px 20px; font-size: 0.9rem;">Filter</button>
-    </form>
+                <div class="ncert-filter-group">
+                    <label class="ncert-filter-label">Question Bank</label>
+                    <select name="bank" class="ncert-filter-select">
+                        <option value="">All Banks</option>
+                        <option value="mcq" {% if selected_bank == 'mcq' %}selected{% endif %}>Practice MCQ</option>
+                        <option value="pyq" {% if selected_bank == 'pyq' %}selected{% endif %}>PYQ</option>
+                    </select>
+                </div>
 
-    {% include "partials/ncert/question_results.html" %}
+                <button type="submit" class="ncert-btn ncert-btn-primary ncert-filter-submit"><i class="fas fa-filter"></i> Apply Filters</button>
+            </form>
+        </aside>
+
+        <main class="ncert-main">
+            {% include "partials/ncert/question_results.html" %}
+        </main>
+    </div>
 </div>
 
 <a href="javascript:history.back()" class="floating-back-btn"><i class="fas fa-arrow-left"></i> Back</a>

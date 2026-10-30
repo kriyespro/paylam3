@@ -1,34 +1,34 @@
-<div class="grid gap-4" id="question-results" style="display: flex; flex-direction: column; gap: 12px;">
+<div id="question-results">
     {% for question in questions %}
-    <div class="question-box" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 0;">
-        <a href="{{ url('ncert:practice', kwargs={'pk': question.pk}) }}" style="flex: 1; text-decoration: none;">
-            <div class="qb-meta">
-                <span class="qmeta-tag qmeta-paper">{{ question.get_bank_display() }}</span>
-                <span class="qmeta-tag qmeta-subject">{{ question.topic.subject.name }}</span>
-                <span class="qmeta-tag qmeta-marks">{{ question.topic.name }}</span>
-                {% if question.difficulty %}<span class="qmeta-tag qmeta-marks">{{ question.difficulty }}</span>{% endif %}
+    <a href="{{ url('ncert:practice', kwargs={'pk': question.pk}) }}" class="ncert-question-card">
+        <div class="ncert-q-header">
+            <div class="ncert-badges">
+                <span class="ncert-badge ncert-badge-year">{{ question.get_bank_display() }}</span>
+                <span class="ncert-badge ncert-badge-subject">{{ question.topic.subject.name }}</span>
+                <span class="ncert-badge ncert-badge-topic">{{ question.topic.name }}</span>
+                {% if question.difficulty %}<span class="ncert-badge ncert-badge-diff">{{ question.difficulty }}</span>{% endif %}
             </div>
-            <p class="q-text-main" style="font-size: 0.95rem;">{{ question.text|striptags }}</p>
-        </a>
-    </div>
+        </div>
+        <div class="ncert-q-text">{{ question.text|striptags }}</div>
+    </a>
     {% else %}
     <p style="color: var(--text-muted);">No questions match those filters.</p>
     {% endfor %}
 
     {% if page_obj.has_other_pages() %}
-    <div style="display:flex; justify-content:center; gap:10px; margin-top:10px;">
+    <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:10px;">
         {% if page_obj.has_previous() %}
         <a href="?subject={{ selected_subject }}&topic={{ selected_topic }}&bank={{ selected_bank }}&page={{ page_obj.previous_page_number() }}"
            hx-get="{{ url('ncert:list') }}?subject={{ selected_subject }}&topic={{ selected_topic }}&bank={{ selected_bank }}&page={{ page_obj.previous_page_number() }}"
            hx-target="#question-results" hx-swap="outerHTML" hx-push-url="true"
-           class="btn-next" style="flex:none; padding:8px 18px; font-size:0.85rem;">&larr; Prev</a>
+           class="ncert-btn ncert-btn-outline" style="padding:10px 18px; font-size:0.85rem;">&larr; Prev</a>
         {% endif %}
         <span style="padding:8px 6px; font-size:0.85rem; color:var(--text-muted);">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
         {% if page_obj.has_next() %}
         <a href="?subject={{ selected_subject }}&topic={{ selected_topic }}&bank={{ selected_bank }}&page={{ page_obj.next_page_number() }}"
            hx-get="{{ url('ncert:list') }}?subject={{ selected_subject }}&topic={{ selected_topic }}&bank={{ selected_bank }}&page={{ page_obj.next_page_number() }}"
            hx-target="#question-results" hx-swap="outerHTML" hx-push-url="true"
-           class="btn-next" style="flex:none; padding:8px 18px; font-size:0.85rem;">Next &rarr;</a>
+           class="ncert-btn ncert-btn-outline" style="padding:10px 18px; font-size:0.85rem;">Next &rarr;</a>
         {% endif %}
     </div>
     {% endif %}

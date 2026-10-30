@@ -1,4 +1,4 @@
-<select name="topic" id="topic-select" style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--border-color); font-family: 'Inter', sans-serif;">
+<select name="topic" id="topic-select" class="ncert-filter-select">
     <option value="">All Topics</option>
     {% for t in topics %}
     <option value="{{ t.pk }}">{{ t.name }}</option>
