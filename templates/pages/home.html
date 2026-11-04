@@ -1242,28 +1242,27 @@
                 </div>
 
                 <div style="padding: 22px 24px;">
+                    {% if daily_prelims %}
                     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
-                        <span style="background: rgba(10,42,102,0.1); color: #0A2A66; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">+50 XP</span>
-                        <span style="background: rgba(245, 158, 11, 0.1); color: #F59E0B; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;"><i class="fas fa-coins"></i> +20</span>
-                        <span style="background: rgba(239, 68, 68, 0.1); color: #EF4444; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;"><i class="fas fa-fire"></i> Hard</span>
+                        <span style="background: rgba(10,42,102,0.1); color: #0A2A66; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">+{{ daily_prelims.xp }} XP</span>
+                        <span style="background: rgba(245, 158, 11, 0.1); color: #F59E0B; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;"><i class="fas fa-coins"></i> +{{ daily_prelims.coins }}</span>
+                        {% if daily_prelims.question.difficulty %}<span style="background: rgba(239, 68, 68, 0.1); color: #EF4444; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;"><i class="fas fa-fire"></i> {{ daily_prelims.question.difficulty }}</span>{% endif %}
                     </div>
 
                     <div style="background: var(--bg-main); padding: 15px; border-radius: 10px; border: 1px dashed var(--border-color); margin-bottom: 20px; min-height: 80px;">
-                        <p style="font-size: 0.95rem; font-weight: 600; color: var(--text-main); line-height: 1.6; margin: 0;">Which Article of the Constitution of India deals with the Right to Equality before law?</p>
+                        <p style="font-size: 0.95rem; font-weight: 600; color: var(--text-main); line-height: 1.6; margin: 0;">{{ daily_prelims.question.text|striptags }}</p>
                     </div>
 
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-                        <div style="display: flex;">
-                            <img src="https://i.pravatar.cc/100?img=4" style="width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; margin-left: 0;" alt="user">
-                            <img src="https://i.pravatar.cc/100?img=5" style="width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; margin-left: -8px;" alt="user">
-                            <img src="https://i.pravatar.cc/100?img=6" style="width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; margin-left: -8px;" alt="user">
-                        </div>
-                        <span style="font-size: 0.85rem; color: var(--text-muted);"><strong>12,450</strong> students attempted today</span>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);"><strong>{{ daily_prelims_attempts }}</strong> student{{ 's' if daily_prelims_attempts != 1 else '' }} attempted today</span>
                     </div>
 
                     <a href="{{ url('prelims:daily') }}" class="btn btn-primary" style="width: 100%; text-align: center; justify-content: center; padding: 13px; border-radius: 10px; font-size: 1rem; font-weight: 700;">
                         <i class="fas fa-play"></i> Attempt Now
                     </a>
+                    {% else %}
+                    <p style="color: var(--text-muted); margin-bottom: 0;">No question available yet — add Prelims questions from the admin dashboard to feature one here.</p>
+                    {% endif %}
                 </div>
             </div>
 
@@ -1286,30 +1285,29 @@
                 </div>
 
                 <div style="padding: 22px 24px;">
+                    {% if daily_mains %}
                     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
-                        <span style="background: rgba(10,42,102,0.1); color: #0A2A66; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">GS 2</span>
-                        <span style="background: rgba(139,92,246,0.1); color: #7C3AED; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">Indian Polity</span>
-                        <span style="background: #F3F4F6; color: var(--text-muted); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">15 Marks</span>
+                        <span style="background: rgba(10,42,102,0.1); color: #0A2A66; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">{{ daily_mains.question.paper }}</span>
+                        {% if daily_mains.question.subject %}<span style="background: rgba(139,92,246,0.1); color: #7C3AED; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">{{ daily_mains.question.subject }}</span>{% endif %}
+                        <span style="background: #F3F4F6; color: var(--text-muted); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">{{ daily_mains.question.marks }} Marks</span>
                     </div>
 
-                    <p style="font-size: 1rem; font-weight: 600; color: var(--text-main); line-height: 1.6; margin-bottom: 16px;">"The basic structure doctrine has protected the Indian Constitution from losing its essence, but it has also led to judicial overreach." Critically analyze this statement.</p>
+                    <p style="font-size: 1rem; font-weight: 600; color: var(--text-main); line-height: 1.6; margin-bottom: 16px;">{{ daily_mains.question.text|striptags }}</p>
 
                     <div style="border: 1px dashed var(--border-color); border-radius: 10px; padding: 14px; background: var(--bg-main); color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; min-height: 60px;">
                         <i class="fas fa-pencil-alt" style="margin-right: 6px; opacity: 0.5;"></i> Write your answer here... (250 words)
                     </div>
 
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-                        <div style="display: flex;">
-                            <img src="https://i.pravatar.cc/100?img=1" style="width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; margin-left: 0;" alt="user">
-                            <img src="https://i.pravatar.cc/100?img=2" style="width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; margin-left: -8px;" alt="user">
-                            <img src="https://i.pravatar.cc/100?img=3" style="width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; margin-left: -8px;" alt="user">
-                        </div>
-                        <span style="font-size: 0.85rem; color: var(--text-muted);"><strong>1143+</strong> students attempted today</span>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);"><strong>{{ daily_mains_attempts }}</strong> student{{ 's' if daily_mains_attempts != 1 else '' }} attempted today</span>
                     </div>
 
                     <a href="{{ url('mains:daily') }}" class="btn btn-primary" style="width: 100%; text-align: center; justify-content: center; padding: 13px; border-radius: 10px; font-size: 1rem; font-weight: 700; background: linear-gradient(135deg, #3b0764, #7C3AED);">
                         <i class="fas fa-pen"></i> Write Answer Now
                     </a>
+                    {% else %}
+                    <p style="color: var(--text-muted); margin-bottom: 0;">No question available yet — add Mains questions from the admin dashboard to feature one here.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>

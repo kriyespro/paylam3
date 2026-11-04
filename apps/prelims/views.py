@@ -10,7 +10,7 @@ from apps.engagement.services import record_attempt
 from .models import DailyQuestion, Question
 
 
-def _todays_daily():
+def get_todays_daily():
     today = date.today()
     daily = DailyQuestion.objects.filter(date=today).select_related('question').first()
     if not daily:
@@ -21,7 +21,7 @@ def _todays_daily():
 
 
 def hub(request):
-    daily = _todays_daily()
+    daily = get_todays_daily()
     context = {
         'daily': daily,
         'daily_attempts': Attempt.objects.filter(question=daily.question).count() if daily else 0,
@@ -153,4 +153,4 @@ def submit_answer(request, pk):
 
 
 def daily_question(request):
-    return render(request, 'pages/prelims/daily.html', {'daily': _todays_daily()})
+    return render(request, 'pages/prelims/daily.html', {'daily': get_todays_daily()})

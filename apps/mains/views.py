@@ -9,7 +9,7 @@ from apps.evaluations.models import Submission
 from .models import DailyMainsQuestion, MainsQuestion
 
 
-def _todays_daily():
+def get_todays_daily():
     today = date.today()
     daily = DailyMainsQuestion.objects.filter(date=today).select_related('question').first()
     if not daily:
@@ -20,7 +20,7 @@ def _todays_daily():
 
 
 def hub(request):
-    daily = _todays_daily()
+    daily = get_todays_daily()
     year_range = MainsQuestion.objects.aggregate(min_year=Min('year'), max_year=Max('year'))
     context = {
         'daily': daily,
@@ -69,4 +69,4 @@ def question_practice(request, pk):
 
 
 def daily_question(request):
-    return render(request, 'pages/mains/daily.html', {'daily': _todays_daily()})
+    return render(request, 'pages/mains/daily.html', {'daily': get_todays_daily()})
