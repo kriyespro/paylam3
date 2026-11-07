@@ -133,6 +133,29 @@ class QuestionFormsetTests(TestCase):
         self.assertEqual(mq.model_answer['wayForward'], [{'label': 'Step one', 'desc': 'Do this first'}])
         self.assertEqual(mq.model_answer['tags'], ['governance', 'polity'])
 
+    def test_mains_question_model_answer_json_box_overrides_plain_fields(self):
+        """Pasting JSON in the advanced box wins over the plain fields, and
+        bad JSON there still fails the form instead of 500ing."""
+        from apps.mains.models import MainsQuestion
+        mq = MainsQuestion.objects.create(external_id='JSON_TEST2', paper='GS1', year=2023, marks=10, text='Q?')
+
+        response = self.client.post(reverse('platform_admin:mains_question_update', kwargs={'pk': mq.pk}), {
+            'external_id': 'JSON_TEST2', 'paper': 'GS1', 'year': '2023', 'subject': 'Test', 'marks': '10',
+            'text': 'Q?',
+            'intro': 'Ignored plain intro',
+            'model_answer_json': '{"intro": "From JSON", "tags": ["json-path"]}',
+        })
+        self.assertRedirects(response, reverse('platform_admin:mains_question_list'))
+        mq.refresh_from_db()
+        self.assertEqual(mq.model_answer, {'intro': 'From JSON', 'tags': ['json-path']})
+
+        response = self.client.post(reverse('platform_admin:mains_question_update', kwargs={'pk': mq.pk}), {
+            'external_id': 'JSON_TEST2', 'paper': 'GS1', 'year': '2023', 'subject': 'Test', 'marks': '10',
+            'text': 'Q?', 'model_answer_json': '{not valid json',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Invalid JSON')
+
 
 class BackupRestoreTests(TestCase):
     """Backup is staff-readable (non-destructive); restore is genuinely

@@ -1,4 +1,7 @@
+import json
+
 from django import forms
+from django.utils.safestring import mark_safe
 
 from apps.blog.models import Post
 from apps.content.models import Subject
@@ -137,48 +140,91 @@ def _lines_to_list(raw):
     return [line.strip() for line in raw.splitlines() if line.strip()]
 
 
+MODEL_ANSWER_JSON_TEMPLATE = """{
+  "intro": "Opening paragraph introducing the issue.",
+  "forPoints": [
+    {"head": "Short heading", "body": "Explanation of this point."}
+  ],
+  "againstPoints": [
+    {"head": "Short heading", "body": "Explanation of this point."}
+  ],
+  "wayForward": [
+    {"label": "Step label", "desc": "What this step involves."}
+  ],
+  "conclusion": "Closing paragraph.",
+  "scoreHints": [
+    "Mention a real example or case study.",
+    "Use a diagram or flowchart where relevant."
+  ],
+  "tags": ["governance", "polity"]
+}"""
+
+MODEL_ANSWER_AI_PROMPT = """Convert the answer below into JSON that follows this exact template (same keys, same structure, fill in the content, remove any sections that don't apply):
+
+""" + MODEL_ANSWER_JSON_TEMPLATE + """
+
+ANSWER TO CONVERT:
+<paste your plain-text model answer here>"""
+
+MODEL_ANSWER_JSON_HELP = mark_safe(
+    '<strong>Advanced, optional.</strong> Paste ready-made JSON here instead of filling the '
+    'fields above — if this box has anything in it, the fields above are ignored.<br><br>'
+    '<strong>Template:</strong>'
+    f'<pre style="white-space:pre-wrap;background:#1118;padding:8px;border-radius:6px;">{MODEL_ANSWER_JSON_TEMPLATE}</pre>'
+    '<strong>Don’t want to write JSON by hand?</strong> Copy this prompt into ChatGPT/Claude '
+    'along with your plain-text answer, and paste what it gives back into this box:'
+    f'<pre style="white-space:pre-wrap;background:#1118;padding:8px;border-radius:6px;">{MODEL_ANSWER_AI_PROMPT}</pre>'
+)
+
+
 class MainsQuestionForm(forms.ModelForm):
     intro = forms.CharField(
         widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 3}),
         required=False,
         label='Model Answer: Introduction',
-        help_text='Opening paragraph of the model answer. Leave blank if not adding a model answer yet.',
+        help_text='Opening paragraph of the model answer. Leave blank if not adding a model answer yet. Ignored if JSON is pasted below.',
     )
     for_points = forms.CharField(
         widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 5}),
         required=False,
         label='Model Answer: Points In Favor',
-        help_text='One point per line, as Heading | Explanation. Example: Transparency | Opens up decision-making to public scrutiny',
+        help_text='One point per line, as Heading | Explanation. Example: Transparency | Opens up decision-making to public scrutiny. Ignored if JSON is pasted below.',
     )
     against_points = forms.CharField(
         widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 5}),
         required=False,
         label='Model Answer: Points Against / Limitations',
-        help_text='One point per line, as Heading | Explanation.',
+        help_text='One point per line, as Heading | Explanation. Ignored if JSON is pasted below.',
     )
     way_forward = forms.CharField(
         widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 5}),
         required=False,
         label='Model Answer: Way Forward',
-        help_text='One step per line, as Step Label | Description.',
+        help_text='One step per line, as Step Label | Description. Ignored if JSON is pasted below.',
     )
     conclusion = forms.CharField(
         widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 3}),
         required=False,
         label='Model Answer: Conclusion',
-        help_text='Closing paragraph of the model answer.',
+        help_text='Closing paragraph of the model answer. Ignored if JSON is pasted below.',
     )
     score_hints = forms.CharField(
         widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 3}),
         required=False,
         label='Model Answer: Scoring Guide',
-        help_text='One hint per line.',
+        help_text='One hint per line. Ignored if JSON is pasted below.',
     )
     tags = forms.CharField(
         widget=forms.TextInput(attrs=ADMIN_INPUT_ATTRS),
         required=False,
         label='Model Answer: Tags',
-        help_text='Comma-separated, e.g. governance, polity, ethics',
+        help_text='Comma-separated, e.g. governance, polity, ethics. Ignored if JSON is pasted below.',
+    )
+    model_answer_json = forms.CharField(
+        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 10, 'style': 'font-family:monospace;font-size:0.85rem;'}),
+        required=False,
+        label='Model Answer: Paste JSON (advanced, optional)',
+        help_text=MODEL_ANSWER_JSON_HELP,
     )
 
     class Meta:
@@ -204,9 +250,26 @@ class MainsQuestionForm(forms.ModelForm):
         self.fields['score_hints'].initial = '\n'.join(answer.get('scoreHints') or [])
         self.fields['tags'].initial = ', '.join(answer.get('tags') or [])
 
+    def clean_model_answer_json(self):
+        raw = self.cleaned_data.get('model_answer_json', '').strip()
+        if not raw:
+            return {}
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise forms.ValidationError(f'Invalid JSON: {exc}')
+        if not isinstance(parsed, dict):
+            raise forms.ValidationError('JSON must be an object (e.g. {"intro": "...", ...}), not a list or plain value.')
+        return parsed
+
     def save(self, commit=True):
         instance = super().save(commit=False)
         data = self.cleaned_data
+        if data.get('model_answer_json'):
+            instance.model_answer = data['model_answer_json']
+            if commit:
+                instance.save()
+            return instance
         model_answer = {}
         if data.get('intro', '').strip():
             model_answer['intro'] = data['intro'].strip()
