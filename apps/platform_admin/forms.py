@@ -1,4 +1,5 @@
 import json
+import re
 
 from django import forms
 from django.utils.safestring import mark_safe
@@ -117,27 +118,131 @@ NcertChoiceFormSet = forms.inlineformset_factory(
 )
 
 
-def _lines_to_pairs(raw, part_names):
-    """Turn 'Head | Body' per-line text into [{part_names[0]: head, part_names[1]: body}, ...]."""
-    pairs = []
-    for line in raw.splitlines():
-        line = line.strip()
+_SECTION_HEADERS = {
+    'in favor': 'forPoints', 'points in favor': 'forPoints', 'for': 'forPoints',
+    'pros': 'forPoints', 'favor': 'forPoints', 'favour': 'forPoints', 'in favour': 'forPoints',
+    'against': 'againstPoints', 'points against': 'againstPoints', 'cons': 'againstPoints',
+    'limitations': 'againstPoints', 'against / limitations': 'againstPoints',
+    'way forward': 'wayForward', 'wayforward': 'wayForward',
+    'conclusion': 'conclusion',
+    'tags': 'tags',
+    'scoring guide': 'scoreHints', 'score hints': 'scoreHints', 'scorehints': 'scoreHints', 'hints': 'scoreHints',
+}
+
+_BULLET_RE = re.compile(r'^(?:[-*•]|\d+[.)])\s*')
+
+
+def _strip_bullet(line):
+    return _BULLET_RE.sub('', line.strip()).strip()
+
+
+def _detect_header(line):
+    """Recognize a section header line, with or without a trailing colon,
+    and with or without content after it on the same line (e.g. both
+    'Tags:' alone and 'Tags: governance, polity' are headers)."""
+    whole = line.rstrip(':').strip().lower()
+    if whole in _SECTION_HEADERS:
+        return _SECTION_HEADERS[whole], ''
+    head, sep, rest = line.partition(':')
+    if sep:
+        key = head.strip().lower()
+        if key in _SECTION_HEADERS:
+            return _SECTION_HEADERS[key], rest.strip()
+    return None, None
+
+
+def parse_plain_model_answer(text):
+    """Turn a freely-typed answer (plain paragraphs + optional section
+    headers like 'In Favor:', 'Way Forward:', 'Tags:') into the model_answer
+    JSON shape, so a non-technical admin never has to write JSON or any
+    special delimiter syntax."""
+    section = 'intro'
+    buckets = {'intro': [], 'forPoints': [], 'againstPoints': [], 'wayForward': [], 'conclusion': [], 'tags': [], 'scoreHints': []}
+    for raw_line in (text or '').splitlines():
+        line = raw_line.strip()
         if not line:
             continue
-        first, sep, second = line.partition('|')
-        pairs.append({part_names[0]: first.strip(), part_names[1]: second.strip() if sep else ''})
-    return pairs
+        header, inline = _detect_header(line)
+        if header:
+            section = header
+            if inline:
+                buckets[section].append(inline)
+            continue
+        buckets[section].append(line)
+
+    model_answer = {}
+    if buckets['intro']:
+        model_answer['intro'] = ' '.join(buckets['intro'])
+
+    for key, part_names in (('forPoints', ('head', 'body')), ('againstPoints', ('head', 'body'))):
+        pairs = []
+        for line in buckets[key]:
+            line = _strip_bullet(line)
+            head, sep, body = line.partition(':')
+            pairs.append({part_names[0]: head.strip() if sep else '', part_names[1]: (body if sep else head).strip()})
+        if pairs:
+            model_answer[key] = pairs
+
+    way_forward = []
+    for line in buckets['wayForward']:
+        line = _strip_bullet(line)
+        label, sep, desc = line.partition(':')
+        way_forward.append({'label': label.strip() if sep else '', 'desc': (desc if sep else label).strip()})
+    if way_forward:
+        model_answer['wayForward'] = way_forward
+
+    if buckets['conclusion']:
+        model_answer['conclusion'] = ' '.join(buckets['conclusion'])
+
+    score_hints = [_strip_bullet(line) for line in buckets['scoreHints']]
+    if score_hints:
+        model_answer['scoreHints'] = score_hints
+
+    tags = [t.strip() for line in buckets['tags'] for t in line.split(',') if t.strip()]
+    if tags:
+        model_answer['tags'] = tags
+
+    return model_answer
 
 
-def _pairs_to_lines(pairs, part_names):
-    return '\n'.join(
-        f"{item.get(part_names[0], '')} | {item.get(part_names[1], '')}"
-        for item in (pairs or [])
-    )
+def render_plain_model_answer(model_answer):
+    """Reverse of parse_plain_model_answer, so editing an existing question
+    shows the same friendly plain text instead of raw JSON."""
+    model_answer = model_answer or {}
+    lines = []
+    if model_answer.get('intro'):
+        lines.append(model_answer['intro'])
 
+    def _pairs_block(header, items, part_names):
+        if not items:
+            return
+        lines.append('')
+        lines.append(f'{header}:')
+        for item in items:
+            head = item.get(part_names[0], '')
+            body = item.get(part_names[1], '')
+            lines.append(f'- {head}: {body}' if head else f'- {body}')
 
-def _lines_to_list(raw):
-    return [line.strip() for line in raw.splitlines() if line.strip()]
+    _pairs_block('In Favor', model_answer.get('forPoints'), ('head', 'body'))
+    _pairs_block('Against', model_answer.get('againstPoints'), ('head', 'body'))
+    _pairs_block('Way Forward', model_answer.get('wayForward'), ('label', 'desc'))
+
+    if model_answer.get('conclusion'):
+        lines.append('')
+        lines.append('Conclusion:')
+        lines.append(model_answer['conclusion'])
+
+    if model_answer.get('scoreHints'):
+        lines.append('')
+        lines.append('Scoring Guide:')
+        for hint in model_answer['scoreHints']:
+            lines.append(f'- {hint}')
+
+    if model_answer.get('tags'):
+        lines.append('')
+        lines.append('Tags: ' + ', '.join(model_answer['tags']))
+
+    return '\n'.join(lines)
 
 
 MODEL_ANSWER_JSON_TEMPLATE = """{
@@ -166,9 +271,33 @@ MODEL_ANSWER_AI_PROMPT = """Convert the answer below into JSON that follows this
 ANSWER TO CONVERT:
 <paste your plain-text model answer here>"""
 
+ANSWER_TEXT_HELP = mark_safe(
+    "Paste your answer as plain text — no JSON, no special formatting needed. It's saved as-is.<br><br>"
+    "Want it to show up in sections (In Favor / Against / Way Forward / Conclusion) on the student "
+    "page? Start those parts with one of these lines on its own: <code>In Favor:</code>, "
+    "<code>Against:</code>, <code>Way Forward:</code>, <code>Conclusion:</code>, <code>Tags:</code>, "
+    "<code>Scoring Guide:</code> — then list each point on its own line. Everything before the first "
+    "such line is the introduction. This is entirely optional; a plain answer with no headers is saved "
+    "as the introduction and works fine.<br><br>"
+    '<strong>Example:</strong>'
+    '<pre style="white-space:pre-wrap;background:#1118;padding:8px;border-radius:6px;">'
+    'Right to Information Act empowers citizens to seek information from public authorities.\n\n'
+    'In Favor:\n'
+    '- Transparency: Opens up government decision-making to public scrutiny.\n'
+    '- Accountability: Makes officials answerable for delays and decisions.\n\n'
+    'Against:\n'
+    '- Misuse: Can be used to harass officials with frivolous queries.\n\n'
+    'Way Forward:\n'
+    '- Digitisation: Move RTI filing and replies fully online.\n\n'
+    'Conclusion:\n'
+    'RTI remains a vital tool for participatory democracy despite implementation gaps.\n\n'
+    'Tags: governance, polity'
+    '</pre>'
+)
+
 MODEL_ANSWER_JSON_HELP = mark_safe(
-    '<strong>Advanced, optional.</strong> Paste ready-made JSON here instead of filling the '
-    'fields above — if this box has anything in it, the fields above are ignored.<br><br>'
+    '<strong>Advanced, optional.</strong> Paste ready-made JSON here instead — if this box has '
+    'anything in it, the plain-text answer above is ignored.<br><br>'
     '<strong>Template:</strong>'
     f'<pre style="white-space:pre-wrap;background:#1118;padding:8px;border-radius:6px;">{MODEL_ANSWER_JSON_TEMPLATE}</pre>'
     '<strong>Don’t want to write JSON by hand?</strong> Copy this prompt into ChatGPT/Claude '
@@ -178,47 +307,11 @@ MODEL_ANSWER_JSON_HELP = mark_safe(
 
 
 class MainsQuestionForm(forms.ModelForm):
-    intro = forms.CharField(
-        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 3}),
+    answer_text = forms.CharField(
+        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 12}),
         required=False,
-        label='Model Answer: Introduction',
-        help_text='Opening paragraph of the model answer. Leave blank if not adding a model answer yet. Ignored if JSON is pasted below.',
-    )
-    for_points = forms.CharField(
-        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 5}),
-        required=False,
-        label='Model Answer: Points In Favor',
-        help_text='One point per line, as Heading | Explanation. Example: Transparency | Opens up decision-making to public scrutiny. Ignored if JSON is pasted below.',
-    )
-    against_points = forms.CharField(
-        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 5}),
-        required=False,
-        label='Model Answer: Points Against / Limitations',
-        help_text='One point per line, as Heading | Explanation. Ignored if JSON is pasted below.',
-    )
-    way_forward = forms.CharField(
-        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 5}),
-        required=False,
-        label='Model Answer: Way Forward',
-        help_text='One step per line, as Step Label | Description. Ignored if JSON is pasted below.',
-    )
-    conclusion = forms.CharField(
-        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 3}),
-        required=False,
-        label='Model Answer: Conclusion',
-        help_text='Closing paragraph of the model answer. Ignored if JSON is pasted below.',
-    )
-    score_hints = forms.CharField(
-        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 3}),
-        required=False,
-        label='Model Answer: Scoring Guide',
-        help_text='One hint per line. Ignored if JSON is pasted below.',
-    )
-    tags = forms.CharField(
-        widget=forms.TextInput(attrs=ADMIN_INPUT_ATTRS),
-        required=False,
-        label='Model Answer: Tags',
-        help_text='Comma-separated, e.g. governance, polity, ethics. Ignored if JSON is pasted below.',
+        label='Model Answer',
+        help_text=ANSWER_TEXT_HELP,
     )
     model_answer_json = forms.CharField(
         widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 10, 'style': 'font-family:monospace;font-size:0.85rem;'}),
@@ -242,13 +335,7 @@ class MainsQuestionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         answer = self.instance.model_answer if self.instance and self.instance.pk else {}
-        self.fields['intro'].initial = answer.get('intro', '')
-        self.fields['for_points'].initial = _pairs_to_lines(answer.get('forPoints'), ('head', 'body'))
-        self.fields['against_points'].initial = _pairs_to_lines(answer.get('againstPoints'), ('head', 'body'))
-        self.fields['way_forward'].initial = _pairs_to_lines(answer.get('wayForward'), ('label', 'desc'))
-        self.fields['conclusion'].initial = answer.get('conclusion', '')
-        self.fields['score_hints'].initial = '\n'.join(answer.get('scoreHints') or [])
-        self.fields['tags'].initial = ', '.join(answer.get('tags') or [])
+        self.fields['answer_text'].initial = render_plain_model_answer(answer)
 
     def clean_model_answer_json(self):
         raw = self.cleaned_data.get('model_answer_json', '').strip()
@@ -267,30 +354,8 @@ class MainsQuestionForm(forms.ModelForm):
         data = self.cleaned_data
         if data.get('model_answer_json'):
             instance.model_answer = data['model_answer_json']
-            if commit:
-                instance.save()
-            return instance
-        model_answer = {}
-        if data.get('intro', '').strip():
-            model_answer['intro'] = data['intro'].strip()
-        for_points = _lines_to_pairs(data.get('for_points', ''), ('head', 'body'))
-        if for_points:
-            model_answer['forPoints'] = for_points
-        against_points = _lines_to_pairs(data.get('against_points', ''), ('head', 'body'))
-        if against_points:
-            model_answer['againstPoints'] = against_points
-        way_forward = _lines_to_pairs(data.get('way_forward', ''), ('label', 'desc'))
-        if way_forward:
-            model_answer['wayForward'] = way_forward
-        if data.get('conclusion', '').strip():
-            model_answer['conclusion'] = data['conclusion'].strip()
-        score_hints = _lines_to_list(data.get('score_hints', ''))
-        if score_hints:
-            model_answer['scoreHints'] = score_hints
-        tags = [t.strip() for t in data.get('tags', '').split(',') if t.strip()]
-        if tags:
-            model_answer['tags'] = tags
-        instance.model_answer = model_answer
+        else:
+            instance.model_answer = parse_plain_model_answer(data.get('answer_text', ''))
         if commit:
             instance.save()
         return instance

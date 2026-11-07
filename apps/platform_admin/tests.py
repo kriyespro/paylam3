@@ -107,42 +107,69 @@ class QuestionFormsetTests(TestCase):
         correct = question.choices.get(is_correct=True)
         self.assertEqual(correct.text, 'Right')
 
-    def test_mains_question_model_answer_plain_fields_build_json(self):
-        """Model answer is entered as plain text fields (no raw JSON), so a
-        non-technical admin can't hit an 'Enter a valid JSON' error."""
+    def test_mains_question_plain_answer_text_with_no_headers_becomes_intro(self):
+        """A non-technical admin can just paste plain text with zero special
+        syntax and it saves fine — no 'Enter a valid JSON' error possible."""
         from apps.mains.models import MainsQuestion
-        mq = MainsQuestion.objects.create(external_id='JSON_TEST', paper='GS1', year=2023, marks=10, text='Q?')
+        mq = MainsQuestion.objects.create(external_id='PLAIN_TEST', paper='GS1', year=2023, marks=10, text='Q?')
         response = self.client.post(reverse('platform_admin:mains_question_update', kwargs={'pk': mq.pk}), {
-            'external_id': 'JSON_TEST', 'paper': 'GS1', 'year': '2023', 'subject': 'Test', 'marks': '10',
+            'external_id': 'PLAIN_TEST', 'paper': 'GS1', 'year': '2023', 'subject': 'Test', 'marks': '10',
             'text': 'Q?',
-            'intro': 'Intro text.',
-            'for_points': 'Transparency | Opens up decisions\nAccountability | Fixes responsibility',
-            'against_points': 'Cost | Expensive to run',
-            'way_forward': 'Step one | Do this first',
-            'conclusion': 'Conclusion text.',
-            'score_hints': 'Mention examples\nUse diagrams',
-            'tags': 'governance, polity',
+            'answer_text': 'Just a plain answer with no special formatting at all.',
         })
         self.assertRedirects(response, reverse('platform_admin:mains_question_list'))
         mq.refresh_from_db()
-        self.assertEqual(mq.model_answer['intro'], 'Intro text.')
+        self.assertEqual(mq.model_answer, {'intro': 'Just a plain answer with no special formatting at all.'})
+
+    def test_mains_question_plain_answer_text_with_headers_builds_sections(self):
+        """Optional section headers (In Favor / Against / Way Forward /
+        Conclusion / Tags) let the same plain-text box auto-build the richer
+        structured JSON the student page renders."""
+        from apps.mains.models import MainsQuestion
+        mq = MainsQuestion.objects.create(external_id='PLAIN_TEST2', paper='GS1', year=2023, marks=10, text='Q?')
+        answer_text = (
+            'Intro paragraph here.\n\n'
+            'In Favor:\n'
+            '- Transparency: Opens up decisions\n'
+            '- Accountability: Fixes responsibility\n\n'
+            'Against:\n'
+            '- Cost: Expensive to run\n\n'
+            'Way Forward:\n'
+            '- Step one: Do this first\n\n'
+            'Conclusion:\n'
+            'Closing paragraph.\n\n'
+            'Scoring Guide:\n'
+            '- Mention examples\n'
+            '- Use diagrams\n\n'
+            'Tags: governance, polity'
+        )
+        response = self.client.post(reverse('platform_admin:mains_question_update', kwargs={'pk': mq.pk}), {
+            'external_id': 'PLAIN_TEST2', 'paper': 'GS1', 'year': '2023', 'subject': 'Test', 'marks': '10',
+            'text': 'Q?', 'answer_text': answer_text,
+        })
+        self.assertRedirects(response, reverse('platform_admin:mains_question_list'))
+        mq.refresh_from_db()
+        self.assertEqual(mq.model_answer['intro'], 'Intro paragraph here.')
         self.assertEqual(mq.model_answer['forPoints'], [
             {'head': 'Transparency', 'body': 'Opens up decisions'},
             {'head': 'Accountability', 'body': 'Fixes responsibility'},
         ])
+        self.assertEqual(mq.model_answer['againstPoints'], [{'head': 'Cost', 'body': 'Expensive to run'}])
         self.assertEqual(mq.model_answer['wayForward'], [{'label': 'Step one', 'desc': 'Do this first'}])
+        self.assertEqual(mq.model_answer['conclusion'], 'Closing paragraph.')
+        self.assertEqual(mq.model_answer['scoreHints'], ['Mention examples', 'Use diagrams'])
         self.assertEqual(mq.model_answer['tags'], ['governance', 'polity'])
 
-    def test_mains_question_model_answer_json_box_overrides_plain_fields(self):
-        """Pasting JSON in the advanced box wins over the plain fields, and
-        bad JSON there still fails the form instead of 500ing."""
+    def test_mains_question_model_answer_json_box_overrides_plain_text(self):
+        """Pasting JSON in the advanced box wins over the plain-text answer,
+        and bad JSON there still fails the form instead of 500ing."""
         from apps.mains.models import MainsQuestion
         mq = MainsQuestion.objects.create(external_id='JSON_TEST2', paper='GS1', year=2023, marks=10, text='Q?')
 
         response = self.client.post(reverse('platform_admin:mains_question_update', kwargs={'pk': mq.pk}), {
             'external_id': 'JSON_TEST2', 'paper': 'GS1', 'year': '2023', 'subject': 'Test', 'marks': '10',
             'text': 'Q?',
-            'intro': 'Ignored plain intro',
+            'answer_text': 'Ignored plain text',
             'model_answer_json': '{"intro": "From JSON", "tags": ["json-path"]}',
         })
         self.assertRedirects(response, reverse('platform_admin:mains_question_list'))
