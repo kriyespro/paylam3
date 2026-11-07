@@ -107,17 +107,31 @@ class QuestionFormsetTests(TestCase):
         correct = question.choices.get(is_correct=True)
         self.assertEqual(correct.text, 'Right')
 
-    def test_invalid_json_on_mains_question_does_not_crash(self):
-        """Same failure class as the choice-id bug from Phase 6 — bad input
-        should fail the form, not 500."""
+    def test_mains_question_model_answer_plain_fields_build_json(self):
+        """Model answer is entered as plain text fields (no raw JSON), so a
+        non-technical admin can't hit an 'Enter a valid JSON' error."""
         from apps.mains.models import MainsQuestion
         mq = MainsQuestion.objects.create(external_id='JSON_TEST', paper='GS1', year=2023, marks=10, text='Q?')
         response = self.client.post(reverse('platform_admin:mains_question_update', kwargs={'pk': mq.pk}), {
             'external_id': 'JSON_TEST', 'paper': 'GS1', 'year': '2023', 'subject': 'Test', 'marks': '10',
-            'text': 'Q?', 'model_answer_json': '{not valid json',
+            'text': 'Q?',
+            'intro': 'Intro text.',
+            'for_points': 'Transparency | Opens up decisions\nAccountability | Fixes responsibility',
+            'against_points': 'Cost | Expensive to run',
+            'way_forward': 'Step one | Do this first',
+            'conclusion': 'Conclusion text.',
+            'score_hints': 'Mention examples\nUse diagrams',
+            'tags': 'governance, polity',
         })
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Invalid JSON')
+        self.assertRedirects(response, reverse('platform_admin:mains_question_list'))
+        mq.refresh_from_db()
+        self.assertEqual(mq.model_answer['intro'], 'Intro text.')
+        self.assertEqual(mq.model_answer['forPoints'], [
+            {'head': 'Transparency', 'body': 'Opens up decisions'},
+            {'head': 'Accountability', 'body': 'Fixes responsibility'},
+        ])
+        self.assertEqual(mq.model_answer['wayForward'], [{'label': 'Step one', 'desc': 'Do this first'}])
+        self.assertEqual(mq.model_answer['tags'], ['governance', 'polity'])
 
 
 class BackupRestoreTests(TestCase):

@@ -1,5 +1,3 @@
-import json
-
 from django import forms
 
 from apps.blog.models import Post
@@ -116,12 +114,71 @@ NcertChoiceFormSet = forms.inlineformset_factory(
 )
 
 
+def _lines_to_pairs(raw, part_names):
+    """Turn 'Head | Body' per-line text into [{part_names[0]: head, part_names[1]: body}, ...]."""
+    pairs = []
+    for line in raw.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        first, sep, second = line.partition('|')
+        pairs.append({part_names[0]: first.strip(), part_names[1]: second.strip() if sep else ''})
+    return pairs
+
+
+def _pairs_to_lines(pairs, part_names):
+    return '\n'.join(
+        f"{item.get(part_names[0], '')} | {item.get(part_names[1], '')}"
+        for item in (pairs or [])
+    )
+
+
+def _lines_to_list(raw):
+    return [line.strip() for line in raw.splitlines() if line.strip()]
+
+
 class MainsQuestionForm(forms.ModelForm):
-    model_answer_json = forms.CharField(
-        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 14, 'style': 'font-family:monospace;font-size:0.85rem;'}),
+    intro = forms.CharField(
+        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 3}),
         required=False,
-        label='Model Answer (JSON)',
-        help_text='Keys: intro, forPoints[{head,body}], againstPoints[{head,body}], wayForward[{label,desc}], conclusion, scoreHints[], tags[]. Leave blank for no model answer yet.',
+        label='Model Answer: Introduction',
+        help_text='Opening paragraph of the model answer. Leave blank if not adding a model answer yet.',
+    )
+    for_points = forms.CharField(
+        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 5}),
+        required=False,
+        label='Model Answer: Points In Favor',
+        help_text='One point per line, as Heading | Explanation. Example: Transparency | Opens up decision-making to public scrutiny',
+    )
+    against_points = forms.CharField(
+        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 5}),
+        required=False,
+        label='Model Answer: Points Against / Limitations',
+        help_text='One point per line, as Heading | Explanation.',
+    )
+    way_forward = forms.CharField(
+        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 5}),
+        required=False,
+        label='Model Answer: Way Forward',
+        help_text='One step per line, as Step Label | Description.',
+    )
+    conclusion = forms.CharField(
+        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 3}),
+        required=False,
+        label='Model Answer: Conclusion',
+        help_text='Closing paragraph of the model answer.',
+    )
+    score_hints = forms.CharField(
+        widget=forms.Textarea(attrs={**ADMIN_TEXTAREA_ATTRS, 'rows': 3}),
+        required=False,
+        label='Model Answer: Scoring Guide',
+        help_text='One hint per line.',
+    )
+    tags = forms.CharField(
+        widget=forms.TextInput(attrs=ADMIN_INPUT_ATTRS),
+        required=False,
+        label='Model Answer: Tags',
+        help_text='Comma-separated, e.g. governance, polity, ethics',
     )
 
     class Meta:
@@ -138,21 +195,39 @@ class MainsQuestionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            self.fields['model_answer_json'].initial = json.dumps(self.instance.model_answer, indent=2, ensure_ascii=False)
-
-    def clean_model_answer_json(self):
-        raw = self.cleaned_data.get('model_answer_json', '').strip()
-        if not raw:
-            return {}
-        try:
-            return json.loads(raw)
-        except json.JSONDecodeError as exc:
-            raise forms.ValidationError(f'Invalid JSON: {exc}')
+        answer = self.instance.model_answer if self.instance and self.instance.pk else {}
+        self.fields['intro'].initial = answer.get('intro', '')
+        self.fields['for_points'].initial = _pairs_to_lines(answer.get('forPoints'), ('head', 'body'))
+        self.fields['against_points'].initial = _pairs_to_lines(answer.get('againstPoints'), ('head', 'body'))
+        self.fields['way_forward'].initial = _pairs_to_lines(answer.get('wayForward'), ('label', 'desc'))
+        self.fields['conclusion'].initial = answer.get('conclusion', '')
+        self.fields['score_hints'].initial = '\n'.join(answer.get('scoreHints') or [])
+        self.fields['tags'].initial = ', '.join(answer.get('tags') or [])
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-        instance.model_answer = self.cleaned_data.get('model_answer_json', {})
+        data = self.cleaned_data
+        model_answer = {}
+        if data.get('intro', '').strip():
+            model_answer['intro'] = data['intro'].strip()
+        for_points = _lines_to_pairs(data.get('for_points', ''), ('head', 'body'))
+        if for_points:
+            model_answer['forPoints'] = for_points
+        against_points = _lines_to_pairs(data.get('against_points', ''), ('head', 'body'))
+        if against_points:
+            model_answer['againstPoints'] = against_points
+        way_forward = _lines_to_pairs(data.get('way_forward', ''), ('label', 'desc'))
+        if way_forward:
+            model_answer['wayForward'] = way_forward
+        if data.get('conclusion', '').strip():
+            model_answer['conclusion'] = data['conclusion'].strip()
+        score_hints = _lines_to_list(data.get('score_hints', ''))
+        if score_hints:
+            model_answer['scoreHints'] = score_hints
+        tags = [t.strip() for t in data.get('tags', '').split(',') if t.strip()]
+        if tags:
+            model_answer['tags'] = tags
+        instance.model_answer = model_answer
         if commit:
             instance.save()
         return instance
